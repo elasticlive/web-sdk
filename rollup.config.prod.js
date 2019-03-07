@@ -11,12 +11,12 @@ export default [{
     input: "src/ELive.js",
     output: [{
       format: "umd",
-      file: "dist/elive.min.js",
+      file: "dist/ELive.min.js",
       name: "ELive",
       intro: `const __VERSION__ = "${meta.version}"; const __ENV__="prod"`
     }, {
       format: "es",
-      file: "dist/elive.min.mjs",
+      file: "dist/ELive.min.mjs",
       intro: `const __VERSION__ = "${meta.version}"; const __ENV__="prod"`
     }],
     plugins: [
@@ -34,13 +34,13 @@ export default [{
     input: "src/ELive.js",
     output: [{
       format: "umd",
-      file: "dist/elive.js",
+      file: "dist/ELive.js",
       name: "ELive",
       banner: copyright,
       intro: `const __ELIVE_VERSION__ = "${meta.version};"`
     }, {
       format: "es",
-      file: "dist/elive.mjs",
+      file: "dist/ELive.mjs",
       banner: copyright,
       intro: `const __ELIVE_VERSION__ = "${meta.version};"`
     }],

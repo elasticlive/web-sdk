@@ -7,14 +7,14 @@ import * as meta from "./package.json";
 export default {
   input: "src/ELive.js",
   output: [{
-      file: "dist/elive.js",
+      file: "dist/ELive.js",
       format: "umd",
       name: "ELive",
       sourcemap: true,
       intro: `const __VERSION__ = "${meta.version}"; const __ENV__="dev";`
     },
     {
-      file: "dist/elive.mjs",
+      file: "dist/ELive.mjs",
       format: "es",
       sourcemap: true,
       intro: `const __VERSION__ = "${meta.version}"; const __ENV__="dev";`
