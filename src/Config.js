@@ -5,7 +5,7 @@
  *  // credential is an authentication information from ELive.
  *  // It consists of the serviceId and key.
  *  credential: {
- *    serviceId: 'dummyid', 
+ *    serviceId: 'dummyid',
  *    key: 'dummykey'
  *  },
  *  // view is a set of tags that will execute media on an HTML document.
@@ -32,7 +32,7 @@
  *  // 'sdk' is an option for developers and some special features.
  *  sdk: {
  *    logLevel: 'ERROR|WARN|INFO|DEBUG|TRACE',
- *    // default value is 'voice'. 
+ *    // default value is 'voice'.
  *    // Set it to music so that you can hear a variety of sounds, such as music, rather than a human voice.
  *    audioType: 'voice|music',
  *    mode: 'dev|prod' // When you want to test it on localhost, change to dev mode.
@@ -52,30 +52,37 @@ var config = (() => {
       remote2: undefined
     },
     rtc: {
-      iceServers: [
-        {urls: 'stun:stun.l.google.com:19302'}
-      ],
+      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
       opt: {},
-      dataOpt: {optional: [{
-        RtpDataChannels: true
-      }]},
-      sdpSemantics: 'unified-plan'
+      dataOpt: {
+        optional: [
+          {
+            RtpDataChannels: true
+          }
+        ]
+      },
+      sdpSemantics: "unified-plan"
     },
-    media: { // correspond to getusermedia option format
-      video: {frameRate: {min:20, max:30}},
-      audio: {channelCount: 2}
+    media: {
+      // correspond to getusermedia option format
+      video: { frameRate: { min: 20, max: 30 } },
+      audio: { channelCount: 2 }
     },
     sdk: {
       url: {
         // sig: "wss://signal.remotemonster.com/ws",
-        sig: 'wss://demo.remotemonster.com/sig',
-        auth: "https://signal.remotemonster.com/rest/init",
-        log: "https://signal.remotemonster.com:2001/topics"
+        sig: "wss://demo.remotemonster.com/sig",
+        auth: "https://auth.remotemonster.com/auth",
+        // auth: "https://signal.remotemonster.com/rest/init",
+        log: "https://signal.remotemonster.com:2001/topics",
+        channelLog: ""
       },
-      logLevel: 'INFO',
-      audioType: 'voice',
-      mode: 'prod'
+      logLevel: "INFO",
+      audioType: "voice",
+      mode: "prod",
+      coachId: undefined, // if defined, it is a primary coach.
+      country: undefined // default: 'KR'
     }
-  }
+  };
 })();
-export default config
+export default config;
