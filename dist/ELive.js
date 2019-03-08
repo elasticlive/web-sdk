@@ -1738,20 +1738,19 @@
 	  return ret;
 	}
 
-	class Context {
-	  constructor() {
+	class Context{
+	  constructor(){
 	    this.token;
 	    this.serviceId;
 	    this.config;
-	    this.version;
 	    this.channel = {
 	      id: undefined,
 	      name: undefined,
 	      peers: [],
 	      startTime: undefined,
 	      status: undefined,
-	      type: undefined, // P2P, CAST, VIEW
-	      members: []
+	      type: undefined,  // P2P, CAST, VIEW
+	      members:[]
 	    };
 	    this.localVideo;
 	    this.remoteMedia;
@@ -1760,11 +1759,8 @@
 	    this.remoteStream = new MediaStream();
 	    this.transceivers = null;
 	    this.devices = {
-	      currentVideoInput: -1,
-	      currentAudioInput: -1,
-	      videoInput: [],
-	      audioInput: [],
-	      audioOutput: []
+	      currentVideoInput: -1, currentAudioInput: -1,
+	      videoInput: [], audioInput: [], audioOutput: []
 	    };
 	    this.peerConnection;
 	    this.dataConnection;
@@ -1778,102 +1774,70 @@
 	    this.signaler;
 	    this.messaging;
 
-	    this.country = undefined;
-	    this.purpose = "P2P";
-	    this.startTime = 0;
-	    this.endTime = 0;
+	    this.country= undefined;
 	  }
 	}
 
 	// TODO: change live to ...
-	const logger = (() => {
+	const logger = (()=> {
 	  let level;
 	  let ctx;
 	  let url;
 
-	  function init(c) {
+	  function init(c){
 	    ctx = c;
 	    level = ctx.config.sdk.logLevel;
 	    url = ctx.config.sdk.url.log;
 	  }
 
-	  function e(...message) {
-	    if (level === "SILENT") {
-	      return;
+	  function e(...message){
+	    if (level === 'SILENT'){
+	      return
 	    }
 	    console.error(...message);
 	  }
 
-	  function w(...message) {
-	    if (level === "SILENT" || level === "ERROR") {
-	      return;
+	  function w(...message){
+	    if (level === 'SILENT' || level === 'ERROR'){
+	      return
 	    }
 	    console.warn(...message);
 	  }
 
-	  function l(...message) {
+	  function l(...message){
 	    i(...message);
 	  }
 
-	  function i(...message) {
-	    if (level === "SILENT" || level === "ERROR" || level === "WARN") {
-	      return;
+	  function i(...message){
+	    if (level === 'SILENT' || level === 'ERROR' || level === 'WARN'){
+	      return
 	    }
 	    console.info(...message);
 	  }
 
-	  function t(ctx, message) {
-	    if (ctx.role === "CALLER" || ctx.role === "CASTOR") return;
-	    fetch(ctx.config.sdk.url.channelLog, {
-	      method: "POST",
-	      body: JSON.stringify(message),
-	      headers: { "Content-Type": "application/json" }
-	    }).catch(e => {
-	      console.error(e);
-	    });
-	  }
-
-	  function d(...message) {
-	    if (
-	      level === "SILENT" ||
-	      level === "ERROR" ||
-	      level === "WARN" ||
-	      level === "INFO"
-	    ) {
-	      return;
+	  function d(...message){
+	    if (level === 'SILENT' || level === 'ERROR' || level === 'WARN' || level === 'INFO'){
+	      return
 	    }
 	    console.debug(...message);
 	  }
 
-	  function v(...object) {
-	    if (
-	      level === "SILENT" ||
-	      level === "ERROR" ||
-	      level === "WARN" ||
-	      level === "INFO" ||
-	      level === "DEBUG"
-	    ) {
-	      return;
+	  function v(...object){
+	    if (level === 'SILENT' || level === 'ERROR' || level === 'WARN' || level === 'INFO' || level === 'DEBUG'){
+	      return
 	    }
 	    console.trace(...object);
 	  }
 
 	  return Object.freeze({
-	    init,
-	    e,
-	    w,
-	    l,
-	    i,
-	    d,
-	    v,
-	    t
-	  });
+	    init, e, w, l, i, d, v
+	  })
 	})();
 
-	class EliveError extends Error {
-	  constructor(message, e) {
+	class SlimeError extends Error{
+	  constructor(message, e){
 	    super(message);
-	    this.name = "ELiveError";
+	    this.name='ELiveError';
 	    if (e) console.error(e);
 	  }
 	}
@@ -1888,33 +1852,27 @@
 
 	  startAnswer(desc) {
 	    logger.i(`start answer for dc`);
-	    this.pc
-	      .setRemoteDescription(desc)
-	      .then(() => {
-	        logger.d("remote description(offer) for dc is set");
-	      })
-	      .catch(e => {
-	        console.error(e);
-	        throw new EliveError("remote description for dc is wrong");
-	      });
-
-	    if (desc.type === "offer") {
-	      this.pc
-	        .createAnswer()
-	        .then(desc => {
-	          this.pc.setLocalDescription(desc).then(() => {
-	            logger.d("local description(answer) for dc is set");
-	            const msg = this.ctx.signaler.createMessage({
-	              command: "sdp",
-	              body: JSON.stringify(desc)
+	    this.pc.setRemoteDescription(desc)
+	        .then(() => {
+	          logger.d('remote description(offer) for dc is set');
+	        }).catch((e) => {
+	          console.error(e);
+	          throw new SlimeError('remote description for dc is wrong')
+	        });
+	      
+	    if (desc.type === 'offer') {
+	      this.pc.createAnswer()
+	        .then((desc) => {
+	          this.pc.setLocalDescription(desc)
+	            .then(() => {
+	              logger.d('local description(answer) for dc is set');
+	              const msg = this.ctx.signaler.createMessage({command: 'sdp', body: JSON.stringify(desc)});
+	              msg.to = this.ctx.peerConnection.to;
+	              msg.pctype = 'DC';
+	              this.ctx.signaler.send(msg);
 	            });
-	            msg.to = this.ctx.peerConnection.to;
-	            msg.pctype = "DC";
-	            this.ctx.signaler.send(msg);
-	          });
-	        })
-	        .catch(e => {
-	          throw new EliveError("failed to create answer for dc", e);
+	        }).catch( (e) => {
+	          throw new SlimeError('failed to create answer for dc', e)
 	        });
 	    }
 	  }
@@ -1927,64 +1885,56 @@
 	  }
 
 	  setRemoteDesciption(desc) {
-	    this.pc
-	      .setRemoteDescription(desc)
+	    this.pc.setRemoteDescription(desc)
 	      .then(() => {
-	        logger.i("remote description(answer) is set");
-	      })
-	      .catch(e => {
+	        logger.i('remote description(answer) is set');
+	      }).catch( e => {
 	        console.error(e);
-	        throw new EliveError("remote description(answer) is wrong");
+	        throw new SlimeError('remote description(answer) is wrong')
 	      });
 	  }
 	  startOffer() {
-	    logger.d("startOffer is started");
-	    this.channel = this.pc.createDataChannel("chat");
-	    this.channel.onopen = e => logger.d("datachannel is connected");
-	    this.channel.onmessage = e =>
-	      this.ctx.callEvent({ name: "onMessage", param: e.data });
+	    logger.d('startOffer is started');
+	    this.channel = this.pc.createDataChannel('chat');
+	    this.channel.onopen = (e) => logger.d('datachannel is connected');
+	    this.channel.onmessage = (e) => this.ctx.callEvent({name:'onMessage', param: e.data});
 
-	    this.pc.createOffer().then(desc => {
-	      this.pc.setLocalDescription(desc).then(() => {
-	        logger.d("local description for dc is set");
-	        const msg = this.ctx.signaler.createMessage({
-	          command: "sdp",
-	          body: JSON.stringify(desc)
-	        });
-	        msg.to = this.ctx.channel.master;
-	        msg.pctype = "DC";
-	        logger.v(msg);
-	        this.ctx.signaler.send(msg);
+	    this.pc.createOffer()
+	      .then((desc) => {
+	        this.pc.setLocalDescription(desc)
+	          .then(() => {
+	            logger.d('local description for dc is set');
+	            const msg = this.ctx.signaler.createMessage({command: 'sdp', body: JSON.stringify(desc)});
+	            msg.to = this.ctx.channel.master;
+	            msg.pctype='DC';
+	            logger.v(msg);
+	            this.ctx.signaler.send(msg);
+	          });
 	      });
-	    });
 	  }
 
 	  listening() {
-	    logger.d("listening is started");
-	    this.pc.ondatachannel = event => {
+	    logger.d('listening is started');
+	    this.pc.ondatachannel = (event) =>{
 	      this.channel = event.channel;
 	      console.log(this.channel);
-	      this.channel.onopen = e => logger.d("datachannel is connected");
-	      this.channel.onmessage = e =>
-	        this.ctx.callEvent({ name: "onMessage", param: e.data });
+	      this.channel.onopen = (e) => logger.d('datachannel is connected');
+	      this.channel.onmessage = (e) => this.ctx.callEvent({name:'onMessage', param: e.data});
 	    };
 	  }
 
 	  sendMessage(msg) {
 	    logger.d(`sendMessage: ${msg}`);
-	    if (this.channel) this.channel.send(msg);
+	    if (this.channel)
+	      this.channel.send(msg);
 	  }
 	}
 
 	const util = (() => {
 	  function validateConfig(ctx) {
-	    if (
-	      !ctx.config.credential ||
-	      !ctx.config.credential.serviceId ||
-	      !ctx.config.credential.key
-	    ) {
+	    if (!ctx.config.credential || !ctx.config.credential.serviceId || !ctx.config.credential.key){
 	      // l.e('no credential data')
-	      throw new EliveError("no credential data");
+	      throw(new SlimeError('no credential data'))
 	    }
 	  }
 
@@ -1999,99 +1949,61 @@
 	        googNoiseSuppression: false,
 	        googNoiseSuppression2: false,
 	        googTypingNoiseDetection: false,
-	        echoCancellation: false
+	        echoCancellation: false,
 	      },
 	      optional: [{ googCpuOveruseDetection: false }]
-	    };
-	  }
-
-	  function makeTransactionLog(ctx) {
-	    const msg = {
-	      pid: ctx.token,
-	      svcid: ctx.config.credential.serviceId,
-	      cid: ctx.channel.id,
-	      type: ctx.channel.type,
-	      start_time: ctx.startTime,
-	      duration: Math.round((ctx.endTime - ctx.startTime) / 1000),
-	      network: "wifi",
-	      status: ctx.state
-	    };
-	    return msg;
+	    }
 	  }
 
 	  async function validateDevices(ctx) {
-	    logger.d("start gathering available devices");
-	    var curVideoDeviceId = -1,
-	      curAudioDeviceId = -1;
+	    logger.d('start gathering available devices');
+	    var curVideoDeviceId = -1, curAudioDeviceId = -1;
 	    if (ctx.config.media.video && ctx.config.media.video.deviceId)
 	      curVideoDeviceId = ctx.config.media.video.deviceId;
 	    if (ctx.config.media.audio && ctx.config.media.audio.deviceId)
 	      curAudioDeviceId = ctx.config.media.audio.deviceId;
-	    await navigator.mediaDevices.enumerateDevices().then(devices => {
-	      for (var i = 0; i < devices.length; i++) {
-	        const device = devices[i];
-	        if (device.kind === "videoinput") {
-	          var length = ctx.devices.videoInput.push({
-	            text: device.label,
-	            id: device.deviceId
-	          });
-	          if (device.deviceId === curVideoDeviceId) {
-	            ctx.devices.currentVideoInput = length - 1;
+	    await navigator.mediaDevices.enumerateDevices()
+	      .then((devices) => {
+	        for (var i = 0; i< devices.length; i++) {
+	          const device = devices[i];
+	          if (device.kind === 'videoinput') {
+	            var length = ctx.devices.videoInput.push({ text: device.label, id: device.deviceId });
+	            if (device.deviceId === curVideoDeviceId) {
+	              ctx.devices.currentVideoInput = (length-1);
+	            }
+	          }else if (device.kind === 'audioinput') {
+	            var length = ctx.devices.audioInput.push({ text: device.label, id: device.deviceId });
+	            if (device.deviceId === curAudioDeviceId) {
+	              ctx.devices.currentAudioInput = (length-1);
+	            }
+	          }else if (device.kind === 'audiooutput') {
+	            ctx.devices.audioOutput.push({ text: device.label, id: device.deviceId });
 	          }
-	        } else if (device.kind === "audioinput") {
-	          var length = ctx.devices.audioInput.push({
-	            text: device.label,
-	            id: device.deviceId
-	          });
-	          if (device.deviceId === curAudioDeviceId) {
-	            ctx.devices.currentAudioInput = length - 1;
-	          }
-	        } else if (device.kind === "audiooutput") {
-	          ctx.devices.audioOutput.push({
-	            text: device.label,
-	            id: device.deviceId
-	          });
 	        }
-	      }
-	    });
-	    if (
-	      ctx.devices.currentVideoInput === -1 &&
-	      ctx.devices.videoInput.length > 0
-	    ) {
+	      });
+	    if (ctx.devices.currentVideoInput === -1 && ctx.devices.videoInput.length >0 ){
 	      ctx.devices.currentVideoInput = 0;
 	    }
-	    if (
-	      ctx.devices.currentAudioInput === -1 &&
-	      ctx.devices.audioInput.length > 0
-	    ) {
+	    if (ctx.devices.currentAudioInput === -1 && ctx.devices.audioInput.length >0 ){
 	      ctx.devices.currentAudioInput = 0;
 	    }
 	    logger.v(ctx.devices);
-	    logger.d("finish gathering available devices");
+	    logger.d('finish gathering available devices');
 	  }
 	  return Object.freeze({
-	    validateConfig,
-	    validateDevices,
-	    getMusicConfiguration,
-	    makeTransactionLog
-	  });
+	    validateConfig, validateDevices, getMusicConfiguration
+	  })
 	})();
 
 	function SigMsgHandler(ctx) {
-	  const sigEvents = {
+	  const sigEvents= {
 	    onCall(msg) {
 	      logger.i(`start onCall with chid:${msg.channel.id}`);
-	      if (!msg.pctype || msg.pctype !== "DC") ctx.channel = msg.channel;
-	      ctx.role = "CALLER";
-	      ctx.callEvent({ name: "onCall", param: { channel: ctx.channel } });
-	      ctx.peerConnection = new RTCPeerConnection(
-	        ctx.config.rtc,
-	        ctx.config.rtc.opt
-	      );
+	      if (!msg.pctype || msg.pctype !== 'DC') ctx.channel = msg.channel;
+	      ctx.callEvent({name:'onCall', param:{channel:ctx.channel}});
+	      ctx.peerConnection = new RTCPeerConnection(ctx.config.rtc, ctx.config.rtc.opt);
 	      ctx.peerConnection.onicecandidate = handleIceCandidate;
-	      ctx.localStream
-	        .getTracks()
-	        .forEach(track => ctx.peerConnection.addTrack(track, ctx.localStream));
+	      ctx.localStream.getTracks().forEach(track => ctx.peerConnection.addTrack(track, ctx.localStream));
 	      ctx.peerConnection.ontrack = handleTrack;
 	      ctx.messaging = new Messaging(ctx);
 	      ctx.messaging.listening();
@@ -2100,17 +2012,11 @@
 	    },
 	    onCallee(msg) {
 	      logger.i(`start onCallee with chid:${msg.channel.id}`);
-	      if (!msg.pctype || msg.pctype !== "DC") ctx.channel = msg.channel;
-	      ctx.role = "CALLEE";
-	      ctx.callEvent({ name: "onCall", param: { channel: ctx.channel } });
-	      ctx.peerConnection = new RTCPeerConnection(
-	        ctx.config.rtc,
-	        ctx.config.rtc.opt
-	      );
+	      if (!msg.pctype || msg.pctype !== 'DC') ctx.channel = msg.channel;
+	      ctx.callEvent({name:'onCall', param:{channel:ctx.channel}});
+	      ctx.peerConnection = new RTCPeerConnection(ctx.config.rtc, ctx.config.rtc.opt);
 	      ctx.peerConnection.onicecandidate = handleIceCandidate;
-	      ctx.localStream
-	        .getTracks()
-	        .forEach(track => ctx.peerConnection.addTrack(track, ctx.localStream));
+	      ctx.localStream.getTracks().forEach(track => ctx.peerConnection.addTrack(track, ctx.localStream));
 	      ctx.peerConnection.ontrack = handleTrack;
 	      ctx.peerConnection.oniceconnectionstatechange = handleIceConnectionEvent;
 	      ctx.peerConnection.to = ctx.channel.master;
@@ -2118,52 +2024,34 @@
 	      ctx.messaging = new Messaging(ctx);
 	      ctx.messaging.startOffer();
 	      ctx.dataConnection.onicecandidate = handleDcIceCandidate;
-	      ctx.peerConnection
-	        .createOffer({ offerToReceiveAudio: 1, offerToReceiveVideo: 1 })
-	        .then(desc => {
-	          desc.sdp = replaceCodec(desc.sdp, /m=video(:?.*)?/, "H264");
+	      ctx.peerConnection.createOffer({offerToReceiveAudio:1, offerToReceiveVideo:1})
+	        .then((desc) => {
+	          desc.sdp = replaceCodec(desc.sdp, /m=video(:?.*)?/, 'H264');
 	          // desc.sdp = desc.sdp.replace('a=fmtp:111 minptime=10;useinbandfec=1',
 	          //   'a=fmtp:111 minptime=20;useinbandfec=1;maxaveragebitrate=256000;stereo=1;sprop-stereo=1;cbr=1')
-	          desc.sdp = desc.sdp.replace(
-	            "a=fmtp:111 minptime=10;useinbandfec=1",
+	          desc.sdp = desc.sdp.replace('a=fmtp:111 minptime=10;useinbandfec=1',
 	            // 'a=fmtp:111 useinbandfec=0;minptime=5;maxptime=20;maxplaybackrate=48000;sprop-maxcapturerate=48000;maxaveragebitrate=400000;stereo=1;cbr=1')
-	            "a=fmtp:111 useinbandfec=1;minptime=10;stereo=1;cbr=1;maxaveragebitrate=400000"
-	          );
+	            'a=fmtp:111 useinbandfec=1;minptime=10;stereo=1;cbr=1;maxaveragebitrate=400000');
 	          if (ctx.config.media.video.bitrate) {
-	            desc.sdp = setMediaBitrate(
-	              desc.sdp,
-	              "video",
-	              ctx.config.media.video.bitrate
-	            );
+	            desc.sdp = setMediaBitrate(desc.sdp, 'video', ctx.config.media.video.bitrate);
 	          }
-	          ctx.peerConnection.setLocalDescription(desc).then(() => {
-	            logger.d("local description setted");
-	            const msg = ctx.signaler.createMessage({
-	              command: "sdp",
-	              body: JSON.stringify(desc)
+	          ctx.peerConnection.setLocalDescription(desc)
+	            .then(() => {
+	              logger.d('local description setted');
+	              const msg = ctx.signaler.createMessage({command: 'sdp', body: JSON.stringify(desc)});
+	              msg.to = ctx.channel.master;
+	              logger.d(`local offer msg: ${JSON.stringify(msg)}`);
+	              ctx.signaler.send(msg);
 	            });
-	            msg.to = ctx.channel.master;
-	            logger.d(`local offer msg: ${JSON.stringify(msg)}`);
-	            ctx.signaler.send(msg);
-	          });
 	        });
 	    },
 	    onCast(msg) {
 	      logger.i(`start onCast with chid: ${msg.channel.id}`);
 	      ctx.channel = msg.channel;
-	      ctx.callEvent({ name: "onCast", param: { channel: ctx.channel } });
-	      ctx.role = "CASTOR";
-	      ctx.peerConnection = new RTCPeerConnection(
-	        ctx.config.rtc,
-	        ctx.config.rtc.opt
-	      );
+	      ctx.callEvent({name:'onCast', param:{channel:ctx.channel}});
+	      ctx.peerConnection = new RTCPeerConnection(ctx.config.rtc, ctx.config.rtc.opt);
 	      ctx.peerConnection.onicecandidate = handleIceCandidate;
-	      ctx.localStream.getTracks().forEach(track =>
-	        ctx.peerConnection.addTransceiver(track, {
-	          direction: "sendonly",
-	          streams: [ctx.localStream]
-	        })
-	      );
+	      ctx.localStream.getTracks().forEach(track => ctx.peerConnection.addTransceiver(track, {direction: 'sendonly', streams: [ctx.localStream]}));
 	      // Array.from(ctx.peerConnection.getTransceivers()).forEach(o => (o.direction = 'sendonly'))
 	      ctx.peerConnection.ontrack = handleTrack;
 	      ctx.peerConnection.oniceconnectionstatechange = handleIceConnectionEvent;
@@ -2172,49 +2060,32 @@
 	      // ctx.messaging = new Messaging(ctx)
 	      // ctx.messaging.startOffer()
 	      // ctx.dataConnection.onicecandidate = handleDcIceCandidate
-	      ctx.peerConnection
-	        .createOffer({
-	          offerToReceiveAudio: 0,
-	          offerToReceiveVideo: 0,
-	          voiceActivityDetection: false
-	        })
-	        .then(desc => {
-	          desc.sdp = replaceCodec(desc.sdp, /m=video(:?.*)?/, "H264");
+	      ctx.peerConnection.createOffer({offerToReceiveAudio:0, offerToReceiveVideo:0, voiceActivityDetection: false})
+	        .then((desc) => {
+	          desc.sdp = replaceCodec(desc.sdp, /m=video(:?.*)?/, 'H264');
 	          if (ctx.config.media.video.bitrate) {
-	            desc.sdp = setMediaBitrate(
-	              desc.sdp,
-	              "video",
-	              ctx.config.media.video.bitrate
-	            );
+	            desc.sdp = setMediaBitrate(desc.sdp, 'video', ctx.config.media.video.bitrate);
 	          }
 	          // desc.sdp = desc.sdp.replace('a=fmtp:111 minptime=10;useinbandfec=1',
 	          //   'a=fmtp:111 minptime=20;useinbandfec=1;maxaveragebitrate=256000;stereo=1;sprop-stereo=1;cbr=1')
-	          desc.sdp = desc.sdp.replace(
-	            "a=fmtp:111 minptime=10;useinbandfec=1",
+	          desc.sdp = desc.sdp.replace('a=fmtp:111 minptime=10;useinbandfec=1',
 	            //'a=fmtp:111 minptime=20;maxaveragebitrate=128000;stereo=1;cbr=1')
-	            "a=fmtp:111 useinbandfec=1;minptime=10;stereo=1;cbr=1;maxaveragebitrate=128000"
-	          );
+	            'a=fmtp:111 useinbandfec=1;minptime=10;stereo=1;cbr=1;maxaveragebitrate=128000');
 	          logger.d(`local offer: ${JSON.stringify(desc)}`);
-	          ctx.peerConnection.setLocalDescription(desc).then(() => {
-	            logger.d("local description setted");
-	            const msg = ctx.signaler.createMessage({
-	              command: "sdp",
-	              body: JSON.stringify(desc)
+	          ctx.peerConnection.setLocalDescription(desc)
+	            .then(() => {
+	              logger.d('local description setted');
+	              const msg = ctx.signaler.createMessage({command: 'sdp', body: JSON.stringify(desc)});
+	              msg.to = ctx.channel.members[0].id;
+	              ctx.signaler.send(msg);
 	            });
-	            msg.to = ctx.channel.members[0].id;
-	            ctx.signaler.send(msg);
-	          });
 	        });
 	    },
 	    onWatch(msg) {
 	      logger.i(`start onWatch with chid: ${msg.channel.id}`);
 	      ctx.channel = msg.channel;
-	      ctx.callEvent({ name: "onWatch", param: { channel: ctx.channel } });
-	      ctx.role = "VIEWER";
-	      ctx.peerConnection = new RTCPeerConnection(
-	        ctx.config.rtc,
-	        ctx.config.rtc.opt
-	      );
+	      ctx.callEvent({name:'onWatch', param:{channel:ctx.channel}});
+	      ctx.peerConnection = new RTCPeerConnection(ctx.config.rtc, ctx.config.rtc.opt);
 	      ctx.peerConnection.onicecandidate = handleIceCandidate;
 	      ctx.peerConnection.ontrack = handleTrack;
 	      ctx.peerConnection.oniceconnectionstatechange = handleViewerIceConnectionEvent;
@@ -2223,63 +2094,58 @@
 	    },
 	    onSearch(msg) {
 	      logger.d(`onSearch ${JSON.stringify(msg.body)}`);
-	      if (!msg.body) return;
+	      if (!msg.body) return
 	      var roomList = new Set();
 	      msg.body.forEach(item => {
 	        roomList.add(item.id);
 	      });
 	      msg.body = [...roomList];
-	      ctx.callEvent({ name: "onSearch", param: msg.body });
+	      ctx.callEvent({name:'onSearch', param:msg.body});
 	    },
 	    async onSdp(msg) {
 	      logger.d(`onSdp: ${msg.body}`);
 	      const desc = new RTCSessionDescription(JSON.parse(msg.body));
-
+	      
 	      ctx.peerConnection.to = msg.from;
-	      if (msg.pctype === "DC") {
-	        if (desc.type === "offer") ctx.messaging.startAnswer(desc);
+	      if (msg.pctype === 'DC') {
+	        if (desc.type === 'offer')
+	          ctx.messaging.startAnswer(desc);
 	        else ctx.messaging.setRemoteDesciption(desc);
-	        return;
+	        return
 	      }
-	      ctx.peerConnection
-	        .setRemoteDescription(desc)
+	      ctx.peerConnection.setRemoteDescription(desc)
 	        .then(() => {
-	          logger.i("remote description is set");
-	        })
-	        .catch(e => {
-	          throw new EliveError("remote description is wrong");
+	          logger.i('remote description is set');
+	        }).catch((e) => {
+	          throw new SlimeError('remote description is wrong')
 	        });
-
-	      if (desc.type === "offer") {
-	        ctx.peerConnection
-	          .createAnswer()
-	          .then(desc => {
-	            desc.sdp = desc.sdp.replace(
-	              "a=fmtp:111 ",
-	              "a=fmtp:111 useinbandfec=1;minptime=10;stereo=1;cbr=1;maxaveragebitrate=128000"
-	            );
-	            // 'a=fmtp:111 maxaveragebitrate=128000;stereo=1;sprop-stereo=1;cbr=1;')
-	            ctx.peerConnection.setLocalDescription(desc).then(() => {
-	              logger.d("local description is set");
-	              const msg = ctx.signaler.createMessage({
-	                command: "sdp",
-	                body: JSON.stringify(desc)
+	      
+	      
+	      if (desc.type === 'offer') {
+	        ctx.peerConnection.createAnswer()
+	          .then((desc) => {
+	            desc.sdp = desc.sdp.replace('a=fmtp:111 ',
+	            'a=fmtp:111 useinbandfec=1;minptime=10;stereo=1;cbr=1;maxaveragebitrate=128000');
+	              // 'a=fmtp:111 maxaveragebitrate=128000;stereo=1;sprop-stereo=1;cbr=1;')
+	            ctx.peerConnection.setLocalDescription(desc)
+	              .then(() => {
+	                logger.d('local description is set');
+	                const msg = ctx.signaler.createMessage({command: 'sdp', body: JSON.stringify(desc)});
+	                msg.to = ctx.peerConnection.to;
+	                ctx.signaler.send(msg);
 	              });
-	              msg.to = ctx.peerConnection.to;
-	              ctx.signaler.send(msg);
-	            });
-	          })
-	          .catch(e => {
-	            throw new EliveError("failed to create answer", e);
+	          }).catch(e => {
+	            throw new SlimeError('failed to create answer', e)
 	          });
 	      }
 	    },
 	    async onIce(msg) {
 	      const candidate = new RTCIceCandidate(JSON.parse(msg.body));
 	      logger.d("candidate: ", JSON.stringify(candidate));
-	      if (msg.pctype && msg.pctype === "DC")
+	      if (msg.pctype && msg.pctype === 'DC')
 	        ctx.dataConnection.addIceCandidate(candidate);
 	      else ctx.peerConnection.addIceCandidate(candidate);
+	      
 	    }
 	  };
 
@@ -2333,7 +2199,7 @@
 	      newMLine = [],
 	      sdpCodec,
 	      mLineSplit,
-	      reg = new RegExp("a=rtpmap:(\\d+) " + preferCodec + "/\\d+");
+	      reg = new RegExp('a=rtpmap:(\\d+) ' + preferCodec + '/\\d+');
 
 	    mLine = sdp.match(mLineReg);
 	    if (!mLine) {
@@ -2348,7 +2214,7 @@
 	    mLine = mLine[0];
 	    sdpCodec = sdpCodec[1];
 
-	    mLineSplit = mLine.split(" ");
+	    mLineSplit = mLine.split(' ');
 	    newMLine.push(mLineSplit[0]);
 	    newMLine.push(mLineSplit[1]);
 	    newMLine.push(mLineSplit[2]);
@@ -2359,118 +2225,95 @@
 	        newMLine.push(mLineSplit[i]);
 	      }
 	    }
-	    return sdp.replace(mLine, newMLine.join(" "));
+	    return sdp.replace(mLine, newMLine.join(' '));
 	  }
 
 	  function handleIceCandidate(event) {
-	    console.log("ice candidate is created");
+	    console.log('ice candidate is created');
 	    console.log(event.candidate);
-	    const msg = ctx.signaler.createMessage({
-	      command: "ice",
-	      body: JSON.stringify(event.candidate)
-	    });
+	    const msg = ctx.signaler.createMessage({command: 'ice', body: JSON.stringify(event.candidate)});
 	    msg.to = ctx.peerConnection.to;
 	    ctx.signaler.send(msg);
 	  }
 
 	  function handleDcIceCandidate(event) {
-	    console.log("ice candidate for dc is created");
+	    console.log('ice candidate for dc is created');
 	    console.log(event.candidate);
-	    const msg = ctx.signaler.createMessage({
-	      command: "ice",
-	      body: JSON.stringify(event.candidate)
-	    });
+	    const msg = ctx.signaler.createMessage({command: 'ice', body: JSON.stringify(event.candidate)});
 	    msg.to = ctx.peerConnection.to;
-	    msg.pctype = "DC";
+	    msg.pctype = 'DC';
 	    ctx.signaler.send(msg);
 	  }
 
 	  function handleViewerIceConnectionEvent(event) {
-	    if (!ctx || ctx.state === "CLOSE") return;
+	    if (!ctx || ctx.state === 'CLOSE') return
 	    logger.i(`ice con evt: ${ctx.peerConnection.iceConnectionState}`);
-	    if (ctx.peerConnection.iceConnectionState === "connected") {
-	      if (ctx.remoteStream.getAudioTracks().length > 1) {
-	        ctx.remoteMedia.srcObject = new MediaStream([
-	          ctx.remoteStream.getAudioTracks()[0]
-	        ]);
-	        if (ctx.remoteMedia2)
-	          ctx.remoteMedia2.srcObject = new MediaStream([
-	            ctx.remoteStream.getAudioTracks()[1]
-	          ]);
-	      } else {
-	        ctx.remoteMedia.srcObject = ctx.remoteStream;
-	      }
-	      ctx.state = "COMPLETE";
-	      ctx.startTime = new Date().getTime();
-	      ctx.callEvent({ name: "onComplete", param: { channel: ctx.channel } });
-	    } else if (ctx.peerConnection.iceConnectionState === "closed") {
-	      if (ctx.state !== "CLOSE") {
-	        ctx.elive.close();
-	        ctx.endTime = new Date().getTime();
-	        logger.t(ctx, util.makeTransactionLog(ctx));
-	      }
-	    } else if (ctx.peerConnection.iceConnectionState === "failed") {
-	      if (ctx.state === "CLOSE") return;
-	      ctx.state = "FAIL";
-	      ctx.endTime = new Date().getTime();
-	      logger.t(ctx, util.makeTransactionLog(ctx));
-	      throw new EliveError("ice connecting is failed");
-	    } else if (ctx.peerConnection.iceConnectionState === "disconnected") {
-	      // 상대 peer에 의해 rtc con이 종료되었을 경우
-	      if (ctx.state !== "CLOSE") {
-	        ctx.state = "CLOSE";
-	        ctx.endTime = new Date().getTime();
-	        logger.t(ctx, util.makeTransactionLog(ctx));
-	        //ctx.elive.close()
-	      }
-	      ctx.callEvent({ name: "onClose", param: {} });
+	    switch(ctx.peerConnection.iceConnectionState) {
+	      case 'connected':
+	        if (ctx.remoteStream.getAudioTracks().length > 1) {
+	          ctx.remoteMedia.srcObject = new MediaStream([ctx.remoteStream.getAudioTracks()[0]]);
+	          if (ctx.remoteMedia2) ctx.remoteMedia2.srcObject = new MediaStream([ctx.remoteStream.getAudioTracks()[1]]);
+	        } else {
+	          ctx.remoteMedia.srcObject = ctx.remoteStream;
+	        }
+	        ctx.state = 'COMPLETE';
+	        ctx.callEvent({name:'onComplete', param:{channel:ctx.channel}});
+	        break
+	      case 'closed':
+	        if (ctx.state !== 'CLOSE'){
+	          ctx.elive.close();
+	        }
+	        break
+	      case 'failed':
+	        ctx.state = 'FAIL';
+	        throw new SlimeError('ice connecting is failed')
+	        break
+	      case 'disconnected': // 상대 peer에 의해 rtc con이 종료되었을 경우
+	        if (ctx.state !== 'CLOSE') {
+	          ctx.state = 'CLOSE';
+	          //ctx.elive.close()
+	        }
+	        ctx.callEvent({name:'onClose', param:{}});
+	        break
+	      default:
 	    }
 	  }
 
 	  function handleIceConnectionEvent(event) {
-	    if (!ctx || ctx.state === "CLOSE") return;
+	    if (!ctx || ctx.state === 'CLOSE') return
 	    logger.i(`ice con evt: ${ctx.peerConnection.iceConnectionState}`);
-	    switch (ctx.peerConnection.iceConnectionState) {
-	      case "connected":
-	        if (ctx.channel.type === "P2P") {
+	    switch(ctx.peerConnection.iceConnectionState) {
+	      case 'connected':
+	        if (ctx.channel.type === 'P2P') {
 	          ctx.signaler.close();
 	          ctx.isConnectToSig = false;
 	          ctx.remoteMedia.srcObject = ctx.remoteStream;
 	        }
-	        ctx.state = "COMPLETE";
-	        ctx.startTime = new Date().getTime();
-	        ctx.callEvent({ name: "onComplete", param: { channel: ctx.channel } });
-	        break;
-	      case "closed":
-	        if (ctx.state !== "CLOSE") {
-	          ctx.elive.close();
-	          ctx.endTime = new Date().getTime();
-	          logger.t(ctx, util.makeTransactionLog(ctx));
-	        }
-	        break;
-	      case "failed":
-	        ctx.state = "FAIL";
-	        ctx.endTime = new Date().getTime();
-	        logger.t(ctx, util.makeTransactionLog(ctx));
-	        throw new EliveError("ice connecting is failed");
-	        break;
-	      case "disconnected": // 상대 peer에 의해 rtc con이 종료되었을 경우
-	        if (ctx.state !== "CLOSE") {
-	          ctx.endTime = new Date().getTime();
-	          logger.t(ctx, util.makeTransactionLog(ctx));
+	        ctx.state = 'COMPLETE';
+	        ctx.callEvent({name:'onComplete', param:{channel:ctx.channel}});
+	        break
+	      case 'closed':
+	        if (ctx.state !== 'CLOSE'){
 	          ctx.elive.close();
 	        }
-	        break;
+	        break
+	      case 'failed':
+	        ctx.state = 'FAIL';
+	        throw new SlimeError('ice connecting is failed')
+	        break
+	      case 'disconnected': // 상대 peer에 의해 rtc con이 종료되었을 경우
+	        if (ctx.state !== 'CLOSE') ctx.elive.close();
+	        break
 	      default:
 	    }
 	  }
 
 	  function handleRenegoEvent(event) {
-	    logger.w("negotiation is needed");
+	    logger.w('negotiation is needed');
 	  }
 
 	  function handleTrack(event) {
-	    logger.d("received track");
+	    logger.d('received track');
 	    console.dir(event);
 	    if (event.type === "track") {
 	      ctx.remoteStream.addTrack(event.track);
@@ -2490,7 +2333,7 @@
 	  ctx.signaler.onMessage(handleEvent);
 	}
 
-	class Signal extends events {
+	class Signal extends events{
 	  constructor(ctx) {
 	    super();
 	    this.ctx = ctx;
@@ -2499,23 +2342,23 @@
 	    this.MAX_RETRIES = 11;
 	  }
 	  init() {
-	    logger.d("start signaler init");
+	    logger.d('start signaler init');
 	    this.ctx.isConnectToSig = false;
 	    this.ctx.sigMsgHandler = SigMsgHandler(this.ctx);
 	    this.ws = new WebSocket(this.ctx.config.sdk.url.sig);
 	    this.ws.onopen = () => {
-	      logger.i("Sig: success connect to sig server");
+	      logger.i('Sig: success connect to sig server');
 	      this.ctx.isConnectToSig = true;
-	      this.ctx.callEvent({ name: "init", param: {} });
+	      this.ctx.callEvent({name:'init', param:{}});
 	    };
-	    this.ws.onerror = e => {
-	      throw new EliveError("websocket is failed", e);
+	    this.ws.onerror = (e) => {
+	      throw new SlimeError('websocket is failed', e)
 	    };
-	    this.ws.onclose = e => {
-	      logger.i("websocket is closed");
+	    this.ws.onclose = (e) => {
+	      logger.i('websocket is closed');
 	    };
 	    this.ws.onmessage = this.onMessageHandler;
-	    logger.d("finished signaler init");
+	    logger.d('finished signaler init');
 	  }
 
 	  onMessage(handler) {
@@ -2523,62 +2366,60 @@
 	  }
 
 	  async call(roomId) {
-	    await this._sendCommand("call", roomId, "P2P");
+	    await this._sendCommand('call', roomId, 'P2P');
 	  }
 
 	  async cast(roomId) {
-	    await this._sendCommand("cast", roomId, "BROADCAST");
+	    await this._sendCommand('cast', roomId, 'BROADCAST');
 	  }
 
 	  async watch(roomId) {
-	    await this._sendCommand("watch", roomId, "BROADCAST");
+	    await this._sendCommand('watch', roomId, 'BROADCAST');
 	  }
-
+	  
 	  async search(id) {
 	    await this.waitForConnection();
-	    const msg = this.createMessage({ command: "search" });
+	    const msg = this.createMessage({command: 'search'});
 	    this.send(msg);
 	  }
 
 	  async _sendCommand(command, roomId, type) {
 	    await this.waitForConnection();
-	    logger.i("start " + command);
+	    logger.i('start '+ command);
 	    this.ctx.channel.id = roomId;
 	    this.ctx.channel.type = type;
-	    const msg = this.createMessage({ command });
+	    const msg = this.createMessage({command});
 	    logger.v(msg);
 	    this.send(msg);
 	  }
 
 	  send(msg) {
 	    const m = JSON.stringify(msg);
-	    if (!this.ws) return;
+	    if (!this.ws) return
 	    try {
 	      this.ws.send(m);
-	    } catch (e) {
-	      throw new EliveError("send error", e);
-	    }
+	    } catch(e) {throw new SlimeError('send error', e)}
 	  }
 
 	  close() {
-	    logger.d("signaler is close");
+	    logger.d('signaler is close');
 	    this.ws.close();
 	    this.ctx.isConnectToSig = false;
 	  }
 
-	  createMessage({ command, body }) {
+	  createMessage({command, body}) {
 	    return {
 	      command,
 	      token: this.ctx.token,
 	      serviceId: this.ctx.config.credential.serviceId,
 	      channel: this.ctx.channel,
 	      body
-	    };
+	    }
 	  }
 	  async waitForConnection() {
 	    for (let i = 5; i <= this.MAX_RETRIES; i++) {
 	      if (this.ctx.isConnectToSig === true) {
-	        return;
+	        return
 	      } else {
 	        const timeout = Math.pow(2, i);
 	        logger.d("wating for init %i", i);
@@ -2591,82 +2432,59 @@
 	      setTimeout(() => {
 	        resolve();
 	      }, timeout);
-	    });
+	    })
 	  }
 	}
 	// module.exports.Signal;
 
-	// import ipinfo from "ipinfo";
-	// ipinfo((err, cloc) => {
-	//   console.log(cloc.country);
-	// })
 	async function Auth(ctx) {
 	  logger.d(`start auth with context`);
 	  const messageBody = {
-	    credential: {
-	      key: ctx.config.credential.key,
-	      serviceId: ctx.config.credential.serviceId
-	    },
+	    credential: { key: ctx.config.credential.key, serviceId: ctx.config.credential.serviceId },
 	    env: {
 	      os: platform.os.family,
-	      osVersion: platform.os.version || "0",
+	      osVersion: platform.os.version || '0',
 	      device: platform.name,
-	      deviceVersion: platform.version || "0",
-	      sdkVersion: ctx.version,
-	      purpose: ctx.purpose,
-	      country:
-	        ctx.config.sdk && ctx.config.sdk.country ? ctx.config.sdk.country : "KR"
+	      deviceVersion: platform.version || '0',
+	      sdkVersion: ctx.elive.version,
+	      country: (ctx.config.sdk && ctx.config.sdk.country)? ctx.config.sdk.country:'KR'
 	    }
 	  };
-	  if (ctx.config.sdk.coachId) messageBody.env.coachId = ctx.config.sdk.coachId;
 	  const message = {
-	    method: "POST",
+	    method: 'POST',
 	    headers: {
-	      Accept: "application/json, text/plain, */*",
-	      "Content-Type": "application/json"
+	      Accept: 'application/json, text/plain, */*',
+	        'Content-Type': 'application/json'
 	    },
 	    body: JSON.stringify(messageBody)
 	  };
 	  try {
 	    const respObject = await fetch(ctx.config.sdk.url.auth, message);
 	    const response = await respObject.json();
-	    logger.d("auth response:");
+	    logger.d('auth response:');
 	    logger.d(response);
-
+	  
 	    Object.keys(response).forEach(responseJsonKey => {
 	      switch (responseJsonKey) {
-	        case "iceServers":
+	        case 'iceServers': {
 	          response[responseJsonKey].forEach(server =>
-	            ctx.config.rtc.iceServers.push(server)
-	          );
-	          break;
-	        case "token":
+	            ctx.config.rtc.iceServers.push(server));
+	          break
+	        }
+	        case 'token': {
 	          ctx.token = response[responseJsonKey];
-	          break;
-	        case "coach":
-	          ctx.config.sdk.url.sig = response[responseJsonKey].url;
-	          break;
-	        case "channelLogUrl":
-	          ctx.config.sdk.url.channelLog = response[responseJsonKey];
-	          break;
+	          break
+	        }
 	        default:
 	      }
 	    });
-	  } catch (e) {
+	  }catch (e) {
 	    console.error(e);
-	    throw new EliveError(
-	      `Auth is failed with id:${ctx.config.credential.serviceId}/ key:${
-        ctx.config.credential.key
-      }`
-	    );
+	    throw new SlimeError(`Auth is failed with id:${ctx.config.credential.serviceId}/ key:${ctx.config.credential.key}`)
 	  }
 	  if (!ctx.token)
-	    throw new EliveError(
-	      `failed to auth with id: ${ctx.config.credential.serviceId} and key: ${
-        ctx.config.credential.key
-      }`
-	    );
-	  logger.d("success auth");
+	    throw new SlimeError(`failed to auth with id: ${ctx.config.credential.serviceId} and key: ${ctx.config.credential.key}`)
+	  logger.d('success auth');
 	}
 
 	/**
@@ -2676,7 +2494,7 @@
 	 *  // credential is an authentication information from ELive.
 	 *  // It consists of the serviceId and key.
 	 *  credential: {
-	 *    serviceId: 'dummyid',
+	 *    serviceId: 'dummyid', 
 	 *    key: 'dummykey'
 	 *  },
 	 *  // view is a set of tags that will execute media on an HTML document.
@@ -2703,7 +2521,7 @@
 	 *  // 'sdk' is an option for developers and some special features.
 	 *  sdk: {
 	 *    logLevel: 'ERROR|WARN|INFO|DEBUG|TRACE',
-	 *    // default value is 'voice'.
+	 *    // default value is 'voice'. 
 	 *    // Set it to music so that you can hear a variety of sounds, such as music, rather than a human voice.
 	 *    audioType: 'voice|music',
 	 *    mode: 'dev|prod' // When you want to test it on localhost, change to dev mode.
@@ -2723,52 +2541,41 @@
 	      remote2: undefined
 	    },
 	    rtc: {
-	      iceServers: [{ urls: "stun:stun.l.google.com:19302" }],
+	      iceServers: [
+	        {urls: 'stun:stun.l.google.com:19302'}
+	      ],
 	      opt: {},
-	      dataOpt: {
-	        optional: [
-	          {
-	            RtpDataChannels: true
-	          }
-	        ]
-	      },
-	      sdpSemantics: "unified-plan"
+	      dataOpt: {optional: [{
+	        RtpDataChannels: true
+	      }]},
+	      sdpSemantics: 'unified-plan'
 	    },
-	    media: {
-	      // correspond to getusermedia option format
-	      video: { frameRate: { min: 20, max: 30 } },
-	      audio: { channelCount: 2 }
+	    media: { // correspond to getusermedia option format
+	      video: {frameRate: {min:20, max:30}},
+	      audio: {channelCount: 2}
 	    },
 	    sdk: {
 	      url: {
 	        // sig: "wss://signal.remotemonster.com/ws",
-	        sig: "wss://demo.remotemonster.com/sig",
-	        auth: "https://auth.remotemonster.com/auth",
-	        // auth: "https://signal.remotemonster.com/rest/init",
-	        log: "https://signal.remotemonster.com:2001/topics",
-	        channelLog: ""
+	        sig: 'wss://demo.remotemonster.com/sig',
+	        auth: "https://signal.remotemonster.com/rest/init",
+	        log: "https://signal.remotemonster.com:2001/topics"
 	      },
-	      logLevel: "INFO",
-	      audioType: "voice",
-	      mode: "prod",
-	      coachId: undefined, // if defined, it is a primary coach.
-	      country: undefined // default: 'KR'
+	      logLevel: 'INFO',
+	      audioType: 'voice',
+	      mode: 'prod'
 	    }
-	  };
+	  }
 	})();
 
 	class Device {
-	  constructor(ctx) {
+	  constructor(ctx){
 	    this.ctx = ctx;
 	  }
 
 	  async captureScreen() {
-	    this.ctx.localStream = await navigator.mediaDevices.getDisplayMedia({
-	      video: true
-	    });
-	    this.ctx.transceivers[1].sender.replaceTrack(
-	      this.ctx.localStream.getTracks()[0]
-	    );
+	    this.ctx.localStream = await navigator.mediaDevices.getDisplayMedia({video:true});
+	    this.ctx.transceivers[1].sender.replaceTrack(this.ctx.localStream.getTracks()[0]);
 	    this.ctx.localStream.addTrack(this.ctx.transceivers[0].sender.track);
 	    this.ctx.localVideo.srcObject = this.ctx.localStream;
 	  }
@@ -2778,136 +2585,92 @@
 	  }
 
 	  async validateDevices() {
-	    logger.d("start gathering available devices");
-	    var curVideoDeviceId = -1,
-	      curAudioDeviceId = -1;
+	    logger.d('start gathering available devices');
+	    var curVideoDeviceId = -1, curAudioDeviceId = -1;
 	    if (this.ctx.config.media.video && this.ctx.config.media.video.deviceId)
 	      curVideoDeviceId = this.ctx.config.media.video.deviceId;
 	    if (this.ctx.config.media.audio && this.ctx.config.media.audio.deviceId)
 	      curAudioDeviceId = this.ctx.config.media.audio.deviceId;
-
-	    await navigator.mediaDevices.enumerateDevices().then(devices => {
-	      for (var i = 0; i < devices.length; i++) {
-	        const device = devices[i];
-	        if (device.kind === "videoinput") {
-	          var length = this.ctx.devices.videoInput.push({
-	            text: device.label,
-	            id: device.deviceId
-	          });
-	          if (device.deviceId === curVideoDeviceId) {
-	            this.ctx.devices.currentVideoInput = length - 1;
+	    
+	    await navigator.mediaDevices.enumerateDevices()
+	      .then((devices) => {
+	        for (var i = 0; i< devices.length; i++) {
+	          const device = devices[i];
+	          if (device.kind === 'videoinput') {
+	            var length = this.ctx.devices.videoInput.push({ text: device.label, id: device.deviceId });
+	            if (device.deviceId === curVideoDeviceId) {
+	              this.ctx.devices.currentVideoInput = (length-1);
+	            }
+	          }else if (device.kind === 'audioinput') {
+	            var length = this.ctx.devices.audioInput.push({ text: device.label, id: device.deviceId });
+	            if (device.deviceId === curAudioDeviceId) {
+	              this.ctx.devices.currentAudioInput = (length-1);
+	            }
+	          }else if (device.kind === 'audiooutput') {
+	            this.ctx.devices.audioOutput.push({ text: device.label, id: device.deviceId });
 	          }
-	        } else if (device.kind === "audioinput") {
-	          var length = this.ctx.devices.audioInput.push({
-	            text: device.label,
-	            id: device.deviceId
-	          });
-	          if (device.deviceId === curAudioDeviceId) {
-	            this.ctx.devices.currentAudioInput = length - 1;
-	          }
-	        } else if (device.kind === "audiooutput") {
-	          this.ctx.devices.audioOutput.push({
-	            text: device.label,
-	            id: device.deviceId
-	          });
 	        }
-	      }
-	    });
-	    if (
-	      this.ctx.devices.videoInput.length === 0 ||
-	      this.ctx.devices.audioInput.length === 0
-	    ) {
-	      throw new EliveError("there is no input device");
+	      });
+	    if (this.ctx.devices.videoInput.length ===0 || this.ctx.devices.audioInput.length === 0) {
+	      throw new SlimeError('there is no input device')
 	    }
-	    if (
-	      this.ctx.devices.currentVideoInput === -1 &&
-	      this.ctx.devices.videoInput.length > 0
-	    ) {
+	    if (this.ctx.devices.currentVideoInput === -1 && this.ctx.devices.videoInput.length >0 ){
 	      this.ctx.devices.currentVideoInput = 0;
 	    }
-	    if (
-	      this.ctx.devices.currentAudioInput === -1 &&
-	      this.ctx.devices.audioInput.length > 0
-	    ) {
+	    if (this.ctx.devices.currentAudioInput === -1 && this.ctx.devices.audioInput.length >0 ){
 	      this.ctx.devices.currentAudioInput = 0;
 	    }
-	    if (document.querySelector("#" + this.ctx.config.view.local))
-	      this.ctx.localVideo = document.querySelector(
-	        "#" + this.ctx.config.view.local
-	      );
-	    if (document.querySelector("#" + this.ctx.config.view.remote)) {
-	      this.ctx.remoteMedia = document.querySelector(
-	        "#" + this.ctx.config.view.remote
-	      );
+	    if (document.querySelector('#'+this.ctx.config.view.local))
+	      this.ctx.localVideo = document.querySelector('#'+this.ctx.config.view.local);
+	    if (document.querySelector('#'+this.ctx.config.view.remote)) {
+	      this.ctx.remoteMedia = document.querySelector('#'+this.ctx.config.view.remote);
 	    }
-	    if (document.querySelector("#" + this.ctx.config.view.remote2)) {
-	      this.ctx.remoteMedia2 = document.querySelector(
-	        "#" + this.ctx.config.view.remote2
-	      );
+	    if (document.querySelector('#'+this.ctx.config.view.remote2)) {
+	      this.ctx.remoteMedia2 = document.querySelector('#'+this.ctx.config.view.remote2);
 	    }
-	    logger.d(
-	      "finish gathering available devices: ${JSON.stringify(this.ctx.devices)}"
-	    );
+	    logger.d('finish gathering available devices: ${JSON.stringify(this.ctx.devices)}');
 	  }
 
 	  setVideoInput(deviceId) {
-	    logger.d("start to set video input with " + deviceId);
+	    logger.d('start to set video input with ' + deviceId);
 	    const devNumber = this.findDevice(deviceId, this.ctx.devices.videoInput);
 	    if (devNumber == -1) {
-	      throw new EliveError(
-	        "incorrect video device. input a right video device id."
-	      );
-	      return;
+	      throw(new SlimeError('incorrect video device. input a right video device id.'))
+	      return
 	    }
 	    this.ctx.devices.currentVideoInput = devNumber;
-	    this.ctx.config.media.video.deviceId = this.ctx.devices.videoInput[
-	      devNumber
-	    ].id;
-	    logger.d("finish to set video input with " + deviceId);
+	    this.ctx.config.media.video.deviceId = this.ctx.devices.videoInput[devNumber].id;
+	    logger.d('finish to set video input with ' + deviceId);
 	  }
 
 	  setAudioInput(deviceId) {
-	    logger.d("start to set audio input with " + deviceId);
+	    logger.d('start to set audio input with ' + deviceId);
 	    const devNumber = this.findDevice(deviceId, this.ctx.devices.audioInput);
 	    if (devNumber == -1) {
-	      throw new EliveError(
-	        "incorrect audio device. input a right audio device id."
-	      );
-	      return;
+	      throw(new SlimeError('incorrect audio device. input a right audio device id.'))
+	      return
 	    }
 	    this.ctx.devices.currentAudioInput = devNumber;
-	    this.ctx.config.media.audio.deviceId = this.ctx.devices.audioInput[
-	      devNumber
-	    ].id;
-	    logger.d("finish to set audio input with " + deviceId);
+	    this.ctx.config.media.audio.deviceId = this.ctx.devices.audioInput[devNumber].id;
+	    logger.d('finish to set audio input with ' + deviceId);
 	  }
 
 	  async switchCamera() {
-	    logger.d("start to switch camera");
-	    if (this.ctx.devices.videoInput.length < 2) return;
-	    if (
-	      ++this.ctx.devices.currentVideoInput ===
-	      this.ctx.devices.videoInput.length
-	    )
-	      this.ctx.devices.currentVideoInput = 0;
-	    this.showLocalVideo(
-	      this.ctx.devices.videoInput[this.ctx.devices.currentVideoInput].id
-	    );
-	    this.ctx.config.media.video.deviceId = {
-	      exact: [
-	        this.ctx.devices.videoInput[this.ctx.devices.currentVideoInput].id
-	      ]
-	    };
-	    logger.d("finish to switch camera");
+	    logger.d('start to switch camera');
+	    if (this.ctx.devices.videoInput.length < 2) return
+	    if (++this.ctx.devices.currentVideoInput === this.ctx.devices.videoInput.length) this.ctx.devices.currentVideoInput = 0;
+	    this.showLocalVideo(this.ctx.devices.videoInput[this.ctx.devices.currentVideoInput].id);
+	    this.ctx.config.media.video.deviceId= {exact:[this.ctx.devices.videoInput[this.ctx.devices.currentVideoInput].id]};
+	    logger.d('finish to switch camera');
 	  }
 
 	  muteRemote(isMute) {
-	    if (!this.ctx.transceivers) return;
+	    if (!this.ctx.transceivers) return
 	    this.ctx.transceivers[1].receiver.track.enabled = !isMute;
 	    this.ctx.transceivers[0].receiver.track.enabled = !isMute;
 	  }
 	  muteLocal(isMute) {
-	    if (!this.ctx.transceivers) return;
+	    if (!this.ctx.transceivers) return
 	    this.ctx.transceivers[1].sender.track.enabled = !isMute;
 	    this.ctx.transceivers[0].sender.track.enabled = !isMute;
 	  }
@@ -2919,88 +2682,80 @@
 	      this.setVideoInput(deviceId);
 	    }
 	    stream = await navigator.mediaDevices.getUserMedia(this.ctx.config.media);
-	    if (!stream) throw new EliveError("can not get user media");
+	    if (!stream) throw new SlimeError('can not get user media')
 	    // if (this.ctx.config.media.video && this.ctx.config.media.video !==false) {
-	    this.ctx.localVideo.srcObject = stream; //localVideo는 이제 localMedia로 이름을 바꾸는 것이 나을 듯.
+	      this.ctx.localVideo.srcObject = stream; //localVideo는 이제 localMedia로 이름을 바꾸는 것이 나을 듯.
 	    // }
 	    this.ctx.localStream = stream;
-	    this.ctx.callEvent({ name: "onDisplayUserMedia", param: stream });
+	    this.ctx.callEvent({name:'onDisplayUserMedia', param: stream});
 	    // this.ctx.evtMgr.dispatchEvent('onEvent', {name:'onDisplayUserMedia', param: stream, ctx: this.ctx})
 	    if (this.ctx.transceivers !== null && this.ctx.transceivers.length > 1) {
-	      this.ctx.transceivers[1].sender.replaceTrack(
-	        this.ctx.localStream.getVideoTracks()[0]
-	      );
+	      this.ctx.transceivers[1].sender.replaceTrack(this.ctx.localStream.getVideoTracks()[0]);
 	    }
 	    logger.d(`finish to show localvideo with dev id ${deviceId}`);
 	  }
 
 	  findDevice(deviceId, devlist) {
 	    logger.d(`start find device ${deviceId}`);
-	    for (var i = 0; i < devlist.length; i++) {
+	    for (var i= 0; i < devlist.length; i++ ){
 	      const dev = devlist[i];
-	      if (dev.id === deviceId) return i;
+	      if (dev.id === deviceId) return i
 	    }
 	    logger.d(`finish find device ${deviceId}`);
-	    return -1;
+	    return -1
 	  }
 
-	  setResolution(width, height) {
+	  setResolution(width, height){
 	    this.ctx.config.media.video.width = width;
 	    this.ctx.config.media.video.height = height;
-	    this.applyRuntime("video");
+	    this.applyRuntime('video');
 	  }
 
 	  setFrameRate(frameRate) {
 	    this.ctx.config.media.video.frameRate = frameRate;
-	    this.applyRuntime("video");
+	    this.applyRuntime('video');
 	  }
 	  // setVolume(volume) {this.devManager.setVolume(volume)}
 	  setAgc(isAgc) {
 	    this.ctx.config.media.audio.autoGainControl = isAgc;
-	    this.applyRuntime("audio");
+	    this.applyRuntime('audio');
 	  }
 	  setChannelCount(count) {
 	    this.ctx.config.media.audio.channelCount = count;
-	    this.applyRuntime("audio");
+	    this.applyRuntime('audio');
 	  }
 	  setEchoCancellation(isAec) {
 	    this.ctx.config.media.audio.echoCancellation = isAec;
-	    this.applyRuntime("audio");
+	    this.applyRuntime('audio');
 	  }
 	  setLatency(latency) {
 	    this.ctx.config.media.audio.latency = latency;
-	    this.applyRuntime("audio");
+	    this.applyRuntime('audio');
 	  }
 	  setNoiseSuppression(ns) {
 	    this.ctx.config.media.audio.noiseSuppression = ns;
-	    this.applyRuntime("audio");
+	    this.applyRuntime('audio');
 	  }
 	  setSampleRate(sampleRate) {
 	    this.ctx.config.media.audio.sampleRate = sampleRate;
-	    this.applyRuntime("audio");
+	    this.applyRuntime('audio');
 	  }
 	  setSampleSize(sampleSize) {
 	    this.ctx.config.media.audio.sampleSize = sampleSize;
-	    this.applyRuntime("audio");
+	    this.applyRuntime('audio');
 	  }
 	  setVolume(volume) {
 	    this.ctx.config.media.audio.volume = sampleRate;
-	    this.applyRuntime("audio");
+	    this.applyRuntime('audio');
 	    if (this.ctx.transceivers)
-	      this.ctx.transceivers[0].receiver.track.applyConstraints({
-	        volume: volume
-	      });
+	      this.ctx.transceivers[0].receiver.track.applyConstraints({volume: volume});
 	  }
 	  applyRuntime(audioOrVideo) {
 	    if (this.ctx.transceivers)
-	      if (audioOrVideo === "video")
-	        this.ctx.transceivers[1].sender.track.applyConstraints(
-	          this.ctx.config.media.video
-	        );
-	      else if (audioOrVideo === "audio")
-	        this.ctx.transceivers[0].sender.track.applyConstraints(
-	          this.ctx.config.media.audio
-	        );
+	      if (audioOrVideo === 'video')
+	        this.ctx.transceivers[1].sender.track.applyConstraints(this.ctx.config.media.video);
+	      else if (audioOrVideo === 'audio')
+	        this.ctx.transceivers[0].sender.track.applyConstraints(this.ctx.config.media.audio);
 	  }
 	}
 
@@ -3031,7 +2786,7 @@
 	 * elive.close()
 	 *
 	 */
-	class ELive extends events {
+	class ELive extends events{
 	  /**
 	   * Constructor of ELive
 	   * @example
@@ -3048,16 +2803,14 @@
 	   *
 	   * @param {config} config - please refer the config page
 	   */
-	  constructor(config$1) {
+	  constructor(config$1){
 	    super();
 	    /**@ignore */
-	    this.version = __VERSION__;
-	    if (!config$1) config$1 = {};
-	    // if (config.sdk && config.sdk.mode === "dev")
-	    //   config.sdk.url = { sig: "ws://localhost:1235/sig" };
+	    this.version='3.0';
+	    if (!config$1) config$1={};
+	    if (config$1.sdk && config$1.sdk.mode ==='dev') config$1.sdk.url= {sig: 'ws://localhost:1235/sig'};
 	    /**@ignore */
 	    this.ctx = new Context();
-	    this.ctx.version = this.version;
 	    this.ctx.elive = this;
 	    this.ctx.config = umd(config, config$1);
 	    logger.init(this.ctx);
@@ -3065,7 +2818,7 @@
 	    /**@ignore */
 	    this.devManager = new Device(this.ctx);
 	    this.ctx.signaler = new Signal(this.ctx);
-	    if (this.ctx.config.sdk.audioType === "music") {
+	    if (this.ctx.config.sdk.audioType === 'music') {
 	      this.ctx.config.rtc.opt = util.getMusicConfiguration();
 	    }
 	    util.validateConfig(this.ctx);
@@ -3079,9 +2832,7 @@
 	   * @param {string} name - name of 1:1 room
 	   */
 	  async call(name) {
-	    this.ctx.purpose = "P2P";
-	    if (this.ctx.devices.audioInput.length == 0)
-	      await this.devManager.validateDevices();
+	    if (this.ctx.devices.audioInput.length == 0) await this.devManager.validateDevices();
 	    await Auth(this.ctx);
 	    await this.devManager.showLocalVideo();
 	    await this.ctx.signaler.init();
@@ -3096,9 +2847,7 @@
 	   * @param {string} name - name of broadcast room
 	   */
 	  async cast(name) {
-	    this.ctx.purpose = "CAST";
-	    if (this.ctx.devices.audioInput.length == 0)
-	      await this.devManager.validateDevices();
+	    if (this.ctx.devices.audioInput.length == 0) await this.devManager.validateDevices();
 	    await Auth(this.ctx);
 	    await this.devManager.showLocalVideo();
 	    await this.ctx.signaler.init();
@@ -3112,13 +2861,8 @@
 	   * @param {string} name - name of broadcast room
 	   */
 	  async watch(name) {
-	    this.ctx.purpose = "CAST";
-	    this.ctx.remoteMedia = document.querySelector(
-	      "#" + this.ctx.config.view.remote
-	    );
-	    this.ctx.remoteMedia2 = document.querySelector(
-	      "#" + this.ctx.config.view.remote2
-	    );
+	    this.ctx.remoteMedia = document.querySelector('#'+this.ctx.config.view.remote);
+	    this.ctx.remoteMedia2 = document.querySelector('#'+this.ctx.config.view.remote2);
 	    await Auth(this.ctx);
 	    await this.ctx.signaler.init();
 	    this.ctx.signaler.watch(name);
@@ -3129,28 +2873,18 @@
 	   * Close all connection
 	   */
 	  async close() {
-	    if (this.ctx.state === "CLOSE" && this.ctx.peerConnection === null) return;
-	    this.ctx.state = "CLOSE";
-	    this.ctx.endTime = new Date().getTime();
-	    logger.t(this.ctx, util.makeTransactionLog(this.ctx));
+	    if (this.ctx.state === 'CLOSE' && this.ctx.peerConnection === null) return
+	    this.ctx.state = 'CLOSE';
 	    this.ctx.isConnectToSig = false;
 	    if (this.ctx.messaging) this.ctx.messaging.close();
 	    this.ctx.signaler.close();
-	    if (this.ctx.peerConnection)
-	      await this.ctx.peerConnection
-	        .getTransceivers()
-	        .forEach(t => (t.direction = "inactive"));
-	    if (!this.ctx.peerConnection) return;
+	    if (this.ctx.peerConnection) await this.ctx.peerConnection.getTransceivers().forEach(t => t.direction='inactive');
+	    if (!this.ctx.peerConnection) return
 	    this.ctx.peerConnection.close();
 	    this.ctx.peerConnection = null;
-	    this.ctx.remoteStream
-	      .getTracks()
-	      .forEach(t => this.ctx.remoteStream.removeTrack(t));
+	    this.ctx.remoteStream.getTracks().forEach(t=>this.ctx.remoteStream.removeTrack(t));
 	    this.ctx.transceivers = null;
-	    this.ctx.callEvent({
-	      name: "onClose",
-	      param: { channel: this.ctx.channel }
-	    });
+	    this.ctx.callEvent({name:'onClose', param:{channel:this.ctx.channel}});
 	  }
 
 	  /**
@@ -3178,118 +2912,80 @@
 	  }
 
 	  //// functions for configurations
-	  setVideoQuality(quality) {}
+	  setVideoQuality(quality){}
 	  /// local video
 	  /** Set the framerate value. It is selectable from 10 to 30. */
-	  setFrameRate(frameRate) {
-	    this.devManager.setFrameRate(frameRate);
-	  }
+	  setFrameRate(frameRate) {this.devManager.setFrameRate(frameRate);}
 	  /** Set the resolution value. It is selectable from 240p to 1280p. Default value is a (640,480) */
-	  setResolution(width, height) {
-	    this.devManager.setResolution(width, height);
-	  }
+	  setResolution(width, height) {this.devManager.setResolution(width, height);}
 	  /// local audio
 	  /** Set the AutoGainControl value. Default value is a true. */
-	  setAgc(isAgc) {
-	    this.devManager.setAgc(isAgc);
-	  }
+	  setAgc(isAgc) {this.devManager.setAgc(isAgc);}
 	  /** Set the number of audio channel. Default value is 2. */
-	  setChannelCount(count) {
-	    this.devManager.setChannelCount(count);
-	  }
+	  setChannelCount(count) {this.devManager.setChannelCount(count);}
 	  /** Set the echo canellation value. Default value is a true. */
-	  setEchoCancellation(isAec) {
-	    this.devManager.setEchoCancellation(isAec);
-	  }
+	  setEchoCancellation(isAec) {this.devManager.setEchoCancellation(isAec);}
 	  /** Set the echo latency of audio. */
-	  setLatency(latency) {
-	    this.devManager.setLatency(latency);
-	  }
+	  setLatency(latency) {this.devManager.setLatency(latency);}
 	  /** Set the noise suppression value. Default value is a true. */
-	  setNoiseSuppression(ns) {
-	    this.devManager.setNoiseSuppression(ns);
-	  }
-	  setSampleSize(sampleSize) {
-	    this.devManager.setSampleSize(sampleSize);
-	  }
-	  setSampleRate(sampleRate) {
-	    this.devManager.setSampleRate(sampleRate);
-	  }
+	  setNoiseSuppression(ns) {this.devManager.setNoiseSuppression(ns);}
+	  setSampleSize(sampleSize) {this.devManager.setSampleSize(sampleSize);}
+	  setSampleRate(sampleRate) {this.devManager.setSampleRate(sampleRate);}
 	  /** volume value should be number from 0.0 to 1.0. */
-	  setVolume(volume) {
-	    this.devManager.setVolume(volume);
-	  }
+	  setVolume(volume) {this.devManager.setVolume(volume);}
 
 	  //// device management functions
 	  /** Capture the screen and use it as the source of local media. */
-	  async captureScreen() {
-	    this.devManager.captureScreen();
-	  }
+	  async captureScreen() {this.devManager.captureScreen();}
 	  /** Stop the captureScreen */
-	  stopCaptureScreen() {
-	    this.devManager.stopCaptureScreen();
-	  }
+	  stopCaptureScreen() {this.devManager.stopCaptureScreen();}
 	  /** Use a specific video input device as local media. You can gather a device list from getDevices()*/
 	  async setVideoInput(deviceId) {
-	    if (this.ctx.devices.audioInput.length == 0)
-	      await this.devManager.validateDevices();
+	    if (this.ctx.devices.audioInput.length == 0) await this.devManager.validateDevices();
 	    this.devManager.setVideoInput(deviceId);
 	  }
 	  /** Use a specific audio input device as local media. You can gather a device list from getDevices()*/
 	  async setAudioInput(deviceId) {
-	    if (this.ctx.devices.audioInput.length == 0)
-	      await this.devManager.validateDevices();
+	    if (this.ctx.devices.audioInput.length == 0) await this.devManager.validateDevices();
 	    this.devManager.setAudioInput(deviceId);
 	  }
 	  /** Use this when you want to display the local input device in the local video tag before calling call or cast method. */
 	  async showLocalVideo(deviceId) {
-	    if (this.ctx.devices.audioInput.length == 0)
-	      await this.devManager.validateDevices();
+	    if (this.ctx.devices.audioInput.length == 0) await this.devManager.validateDevices();
 	    await this.devManager.showLocalVideo(deviceId);
 	  }
 	  /** If there is more than one camera, switch it. */
 	  async switchCamera() {
-	    if (this.ctx.devices.audioInput.length == 0)
-	      await this.devManager.validateDevices();
+	    if (this.ctx.devices.audioInput.length == 0) await this.devManager.validateDevices();
 	    this.devManager.switchCamera();
 	  }
 	  /**
 	   * Mute remote media
 	   * @param {boolean} isMute
 	   */
-	  muteRemote(isMute) {
-	    this.devManager.muteRemote(isMute);
-	  }
+	  muteRemote(isMute) {this.devManager.muteRemote(isMute);}
 	  /**
 	   * Mute local media
 	   * @param {boolean} isMute
 	   */
-	  muteLocal(isMute) {
-	    this.devManager.muteLocal(isMute);
-	  }
+	  muteLocal(isMute) {this.devManager.muteLocal(isMute);}
 
 	  /** Get list of all local media devices such as video, speaker and mic. */
-	  getDevices() {
-	    return this.ctx.devices;
-	  }
+	  getDevices() {return this.ctx.devices}
 
 	  //// functions for information
 	  /** Get the quality of the stream realtime. WebRTC is variable in quality depending on network conditions.*/
-
 	  getHealth() {}
 	  getState() {}
 	  /** Get a room id */
-	  getRoomId() {
-	    return this.ctx.channel.id;
-	  }
+	  getRoomId() { return this.ctx.channel.id }
 
 	  /**
 	   * Search the room of the current service. If there is no parameter, it searches all rooms of the service.
 	   * @param {string} id - search keyword for room
 	   */
-	  async search(id) {
-	    this.ctx.purpose = "CAST";
-	    if (!this.ctx) return;
+	  async search(id){
+	    if (!this.ctx) return
 	    if (this.ctx.signaler && !this.ctx.isConnectToSig) {
 	      await Auth(this.ctx);
 	      await this.ctx.signaler.init();
@@ -3297,13 +2993,13 @@
 	    if (this.ctx && this.ctx.signaler) this.ctx.signaler.search(id);
 	  }
 
-	  status() {
+	  status(){
 	    var status = {
 	      version: this.version,
 	      platform: platform.name,
 	      platformVersion: platform.version
 	    };
-	    return status;
+	    return status
 	  }
 	}
 

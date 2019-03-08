@@ -1,15 +1,15 @@
-"use strict";
-import platform from "platform";
-import deepmerge from "deepmerge";
-import EventEmitter from "events";
+'use strict'
+import platform from 'platform'
+import deepmerge from 'deepmerge'
+import EventEmitter from 'events';
 
-import Context from "./Context";
-import Signal from "./Signal";
-import auth from "./Auth";
-import Config from "./Config";
-import l from "./Logger";
-import util from "./Util";
-import Device from "./Device";
+import Context from './Context'
+import Signal from './Signal'
+import auth from './Auth'
+import Config from './Config'
+import l from './Logger'
+import util from './Util'
+import Device from './Device'
 
 /**
  * <p>Main class for ElasticLive. It can help to make P2P call and broadcast room. It can also join the broadcast room and adjust constraints.</p>
@@ -38,7 +38,7 @@ import Device from "./Device";
  * elive.close()
  *
  */
-class ELive extends EventEmitter {
+class ELive extends EventEmitter{
   /**
    * Constructor of ELive
    * @example
@@ -55,28 +55,26 @@ class ELive extends EventEmitter {
    *
    * @param {config} config - please refer the config page
    */
-  constructor(config) {
-    super();
+  constructor(config){
+    super()
     /**@ignore */
-    this.version = __VERSION__;
-    if (!config) config = {};
-    // if (config.sdk && config.sdk.mode === "dev")
-    //   config.sdk.url = { sig: "ws://localhost:1235/sig" };
+    this.version='3.0'
+    if (!config) config={}
+    if (config.sdk && config.sdk.mode ==='dev') config.sdk.url= {sig: 'ws://localhost:1235/sig'}
     /**@ignore */
-    this.ctx = new Context();
-    this.ctx.version = this.version;
-    this.ctx.elive = this;
-    this.ctx.config = deepmerge(Config, config);
-    l.init(this.ctx);
-    this.ctx.callEvent = this.onEvent;
+    this.ctx = new Context()
+    this.ctx.elive = this
+    this.ctx.config = deepmerge(Config, config)
+    l.init(this.ctx)
+    this.ctx.callEvent = this.onEvent
     /**@ignore */
-    this.devManager = new Device(this.ctx);
-    this.ctx.signaler = new Signal(this.ctx);
-    if (this.ctx.config.sdk.audioType === "music") {
-      this.ctx.config.rtc.opt = util.getMusicConfiguration();
+    this.devManager = new Device(this.ctx)
+    this.ctx.signaler = new Signal(this.ctx)
+    if (this.ctx.config.sdk.audioType === 'music') {
+      this.ctx.config.rtc.opt = util.getMusicConfiguration()
     }
-    util.validateConfig(this.ctx);
-    this.search = this.search.bind(this);
+    util.validateConfig(this.ctx)
+    this.search = this.search.bind(this)
   }
 
   //// main functions
@@ -86,15 +84,13 @@ class ELive extends EventEmitter {
    * @param {string} name - name of 1:1 room
    */
   async call(name) {
-    this.ctx.purpose = "P2P";
-    if (this.ctx.devices.audioInput.length == 0)
-      await this.devManager.validateDevices();
-    await auth(this.ctx);
-    await this.devManager.showLocalVideo();
-    await this.ctx.signaler.init();
-    this.ctx.signaler.call(name);
+    if (this.ctx.devices.audioInput.length == 0) await this.devManager.validateDevices()
+    await auth(this.ctx)
+    await this.devManager.showLocalVideo()
+    await this.ctx.signaler.init()
+    this.ctx.signaler.call(name)
     // make sendrecv room for call
-    l.d(`finish to call the ${name} room`);
+    l.d(`finish to call the ${name} room`)
   }
 
   /**
@@ -103,14 +99,12 @@ class ELive extends EventEmitter {
    * @param {string} name - name of broadcast room
    */
   async cast(name) {
-    this.ctx.purpose = "CAST";
-    if (this.ctx.devices.audioInput.length == 0)
-      await this.devManager.validateDevices();
-    await auth(this.ctx);
-    await this.devManager.showLocalVideo();
-    await this.ctx.signaler.init();
-    this.ctx.signaler.cast(name);
-    l.d(`finish to cast the ${name} room`);
+    if (this.ctx.devices.audioInput.length == 0) await this.devManager.validateDevices()
+    await auth(this.ctx)
+    await this.devManager.showLocalVideo()
+    await this.ctx.signaler.init()
+    this.ctx.signaler.cast(name)
+    l.d(`finish to cast the ${name} room`)
   }
 
   /**
@@ -119,45 +113,30 @@ class ELive extends EventEmitter {
    * @param {string} name - name of broadcast room
    */
   async watch(name) {
-    this.ctx.purpose = "CAST";
-    this.ctx.remoteMedia = document.querySelector(
-      "#" + this.ctx.config.view.remote
-    );
-    this.ctx.remoteMedia2 = document.querySelector(
-      "#" + this.ctx.config.view.remote2
-    );
-    await auth(this.ctx);
-    await this.ctx.signaler.init();
-    this.ctx.signaler.watch(name);
-    l.d(`finish to call the ${name} room`);
+    this.ctx.remoteMedia = document.querySelector('#'+this.ctx.config.view.remote)
+    this.ctx.remoteMedia2 = document.querySelector('#'+this.ctx.config.view.remote2)
+    await auth(this.ctx)
+    await this.ctx.signaler.init()
+    this.ctx.signaler.watch(name)
+    l.d(`finish to call the ${name} room`)
   }
 
   /**
    * Close all connection
    */
   async close() {
-    if (this.ctx.state === "CLOSE" && this.ctx.peerConnection === null) return;
-    this.ctx.state = "CLOSE";
-    this.ctx.endTime = new Date().getTime();
-    l.t(this.ctx, util.makeTransactionLog(this.ctx));
-    this.ctx.isConnectToSig = false;
-    if (this.ctx.messaging) this.ctx.messaging.close();
-    this.ctx.signaler.close();
-    if (this.ctx.peerConnection)
-      await this.ctx.peerConnection
-        .getTransceivers()
-        .forEach(t => (t.direction = "inactive"));
-    if (!this.ctx.peerConnection) return;
-    this.ctx.peerConnection.close();
-    this.ctx.peerConnection = null;
-    this.ctx.remoteStream
-      .getTracks()
-      .forEach(t => this.ctx.remoteStream.removeTrack(t));
-    this.ctx.transceivers = null;
-    this.ctx.callEvent({
-      name: "onClose",
-      param: { channel: this.ctx.channel }
-    });
+    if (this.ctx.state === 'CLOSE' && this.ctx.peerConnection === null) return
+    this.ctx.state = 'CLOSE'
+    this.ctx.isConnectToSig = false
+    if (this.ctx.messaging) this.ctx.messaging.close()
+    this.ctx.signaler.close()
+    if (this.ctx.peerConnection) await this.ctx.peerConnection.getTransceivers().forEach(t => t.direction='inactive')
+    if (!this.ctx.peerConnection) return
+    this.ctx.peerConnection.close()
+    this.ctx.peerConnection = null
+    this.ctx.remoteStream.getTracks().forEach(t=>this.ctx.remoteStream.removeTrack(t))
+    this.ctx.transceivers = null
+    this.ctx.callEvent({name:'onClose', param:{channel:this.ctx.channel}})
   }
 
   /**
@@ -166,7 +145,7 @@ class ELive extends EventEmitter {
    * @param {string} msg
    */
   sendMessage(msg) {
-    this.ctx.messaging.sendMessage(msg);
+    this.ctx.messaging.sendMessage(msg)
   }
   /**
    * <p>Method for callback event to sdk users.</p>
@@ -181,136 +160,98 @@ class ELive extends EventEmitter {
    * @param {EventEmitter.message} message
    */
   onEvent(message) {
-    this.elive.emit(message.name, message.param);
+    this.elive.emit(message.name, message.param)
   }
 
   //// functions for configurations
-  setVideoQuality(quality) {}
+  setVideoQuality(quality){}
   /// local video
   /** Set the framerate value. It is selectable from 10 to 30. */
-  setFrameRate(frameRate) {
-    this.devManager.setFrameRate(frameRate);
-  }
+  setFrameRate(frameRate) {this.devManager.setFrameRate(frameRate)}
   /** Set the resolution value. It is selectable from 240p to 1280p. Default value is a (640,480) */
-  setResolution(width, height) {
-    this.devManager.setResolution(width, height);
-  }
+  setResolution(width, height) {this.devManager.setResolution(width, height)}
   /// local audio
   /** Set the AutoGainControl value. Default value is a true. */
-  setAgc(isAgc) {
-    this.devManager.setAgc(isAgc);
-  }
+  setAgc(isAgc) {this.devManager.setAgc(isAgc)}
   /** Set the number of audio channel. Default value is 2. */
-  setChannelCount(count) {
-    this.devManager.setChannelCount(count);
-  }
+  setChannelCount(count) {this.devManager.setChannelCount(count)}
   /** Set the echo canellation value. Default value is a true. */
-  setEchoCancellation(isAec) {
-    this.devManager.setEchoCancellation(isAec);
-  }
+  setEchoCancellation(isAec) {this.devManager.setEchoCancellation(isAec)}
   /** Set the echo latency of audio. */
-  setLatency(latency) {
-    this.devManager.setLatency(latency);
-  }
+  setLatency(latency) {this.devManager.setLatency(latency)}
   /** Set the noise suppression value. Default value is a true. */
-  setNoiseSuppression(ns) {
-    this.devManager.setNoiseSuppression(ns);
-  }
-  setSampleSize(sampleSize) {
-    this.devManager.setSampleSize(sampleSize);
-  }
-  setSampleRate(sampleRate) {
-    this.devManager.setSampleRate(sampleRate);
-  }
+  setNoiseSuppression(ns) {this.devManager.setNoiseSuppression(ns)}
+  setSampleSize(sampleSize) {this.devManager.setSampleSize(sampleSize)}
+  setSampleRate(sampleRate) {this.devManager.setSampleRate(sampleRate)}
   /** volume value should be number from 0.0 to 1.0. */
-  setVolume(volume) {
-    this.devManager.setVolume(volume);
-  }
+  setVolume(volume) {this.devManager.setVolume(volume)}
 
   //// device management functions
   /** Capture the screen and use it as the source of local media. */
-  async captureScreen() {
-    this.devManager.captureScreen();
-  }
+  async captureScreen() {this.devManager.captureScreen()}
   /** Stop the captureScreen */
-  stopCaptureScreen() {
-    this.devManager.stopCaptureScreen();
-  }
+  stopCaptureScreen() {this.devManager.stopCaptureScreen()}
   /** Use a specific video input device as local media. You can gather a device list from getDevices()*/
   async setVideoInput(deviceId) {
-    if (this.ctx.devices.audioInput.length == 0)
-      await this.devManager.validateDevices();
-    this.devManager.setVideoInput(deviceId);
+    if (this.ctx.devices.audioInput.length == 0) await this.devManager.validateDevices()
+    this.devManager.setVideoInput(deviceId)
   }
   /** Use a specific audio input device as local media. You can gather a device list from getDevices()*/
   async setAudioInput(deviceId) {
-    if (this.ctx.devices.audioInput.length == 0)
-      await this.devManager.validateDevices();
-    this.devManager.setAudioInput(deviceId);
+    if (this.ctx.devices.audioInput.length == 0) await this.devManager.validateDevices()
+    this.devManager.setAudioInput(deviceId)
   }
   /** Use this when you want to display the local input device in the local video tag before calling call or cast method. */
   async showLocalVideo(deviceId) {
-    if (this.ctx.devices.audioInput.length == 0)
-      await this.devManager.validateDevices();
-    await this.devManager.showLocalVideo(deviceId);
+    if (this.ctx.devices.audioInput.length == 0) await this.devManager.validateDevices()
+    await this.devManager.showLocalVideo(deviceId)
   }
   /** If there is more than one camera, switch it. */
   async switchCamera() {
-    if (this.ctx.devices.audioInput.length == 0)
-      await this.devManager.validateDevices();
-    this.devManager.switchCamera();
+    if (this.ctx.devices.audioInput.length == 0) await this.devManager.validateDevices()
+    this.devManager.switchCamera()
   }
   /**
    * Mute remote media
    * @param {boolean} isMute
    */
-  muteRemote(isMute) {
-    this.devManager.muteRemote(isMute);
-  }
+  muteRemote(isMute) {this.devManager.muteRemote(isMute)}
   /**
    * Mute local media
    * @param {boolean} isMute
    */
-  muteLocal(isMute) {
-    this.devManager.muteLocal(isMute);
-  }
+  muteLocal(isMute) {this.devManager.muteLocal(isMute)}
 
   /** Get list of all local media devices such as video, speaker and mic. */
-  getDevices() {
-    return this.ctx.devices;
-  }
+  getDevices() {return this.ctx.devices}
 
   //// functions for information
   /** Get the quality of the stream realtime. WebRTC is variable in quality depending on network conditions.*/
-
   getHealth() {}
   getState() {}
   /** Get a room id */
-  getRoomId() {
-    return this.ctx.channel.id;
-  }
+  getRoomId() { return this.ctx.channel.id }
 
   /**
    * Search the room of the current service. If there is no parameter, it searches all rooms of the service.
    * @param {string} id - search keyword for room
    */
-  async search(id) {
-    this.ctx.purpose = "CAST";
-    if (!this.ctx) return;
+  async search(id){
+    if (!this.ctx) return
     if (this.ctx.signaler && !this.ctx.isConnectToSig) {
-      await auth(this.ctx);
-      await this.ctx.signaler.init();
+      await auth(this.ctx)
+      await this.ctx.signaler.init()
     }
-    if (this.ctx && this.ctx.signaler) this.ctx.signaler.search(id);
+    if (this.ctx && this.ctx.signaler) this.ctx.signaler.search(id)
   }
 
-  status() {
+  status(){
     var status = {
       version: this.version,
       platform: platform.name,
       platformVersion: platform.version
-    };
-    return status;
+    }
+    return status
   }
 }
 
