@@ -2,9 +2,9 @@
 [![CircleCI](https://circleci.com/gh/elasticlive/web-sdk.svg?style=svg)](https://circleci.com/gh/elasticlive/web-sdk)
 
 
-# ELive web SDK
+# elasticlive web SDK
 
-ELive - WebRTC Live Streming Cloud platform
+elasticlive - WebRTC Live Streming Cloud platform
 
 - [Website](https://elasticlive.io)
 
