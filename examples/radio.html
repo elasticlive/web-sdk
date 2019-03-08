@@ -17,14 +17,6 @@
       rel="stylesheet"
       href="https://cdn.rawgit.com/CreativeIT/getmdl-select/master/getmdl-select.min.css"
     />
-    <script
-      defer
-      src="https://cdn.rawgit.com/CreativeIT/getmdl-select/master/getmdl-select.min.js"
-    ></script>
-    <script>
-      let logLayerPop = false;
-      let setupLayerPop = false;
-    </script>
     <style>
       video {
         width: 100%;
@@ -48,27 +40,24 @@
         box-shadow: 0 1px 5px #d9d9d9;
         float: left;
       }
+      .demo-card-square.mdl-card {
+        align-self: center;
+        margin: 0 auto;
+        margin-top: 10px;
+        width: 320px;
+        height: 240px;
+      }
+      .demo-card-square > .mdl-card__title {
+        color: #fff;
+        font-size: 2px;
+        background-color: goldenrod;
+        background-size: cover;
+      }
     </style>
   </head>
 
   <body>
     <main id="mainDiv">
-      <style>
-        .demo-card-square.mdl-card {
-          align-self: center;
-          margin: 0 auto;
-          margin-top: 10px;
-          width: 320px;
-          height: 240px;
-        }
-        .demo-card-square > .mdl-card__title {
-          color: #fff;
-          font-size: 2px;
-          background-color: goldenrod;
-          background-size: cover;
-        }
-      </style>
-
       <div class="demo-card-square mdl-card mdl-shadow--2dp">
         <div class="mdl-card__title mdl-card--expand">
           <h2 class="mdl-card__title-text">Live Radio service</h2>
@@ -164,6 +153,14 @@
         style="display:none; visibility: hidden;"
       ></audio>
     </main>
+    <script
+      defer
+      src="https://cdn.rawgit.com/CreativeIT/getmdl-select/master/getmdl-select.min.js"
+    ></script>
+    <script>
+      window.logLayerPop = false;
+      window.setupLayerPop = false;
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/webrtc-adapter/out/adapter.js"></script>
     <script src="./ELive.js"></script>
     <script src="./radio.js"></script>
