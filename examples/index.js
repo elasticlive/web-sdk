@@ -1,4 +1,4 @@
-var config = {
+const config = {
   credential: {
     serviceId: "simpleapp",
     key: "27f8ca5ee273153d9a9c5944c766fa097d2e16de4dda425a"
@@ -6,7 +6,6 @@ var config = {
   sdk: {
     logLevel: "VERBOSE",
     mode: "dev"
-    // coachId: "KR-ELIVEDEV-JINHO-1"
     // audioType: 'music'
   },
   view: {
@@ -21,7 +20,7 @@ var config = {
     audio: { deviceId: "default" }
   }
 };
-var live = new ELive(config);
+const live = new ELive(config);
 live.on("onDisplayUserMedia", stream => {
   console.log("success to get stream from user media");
 });

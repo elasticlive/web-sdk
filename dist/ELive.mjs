@@ -1,5 +1,6 @@
-// https://elasticlive.io v0.0.0-development Copyright 2019 RemoteMonster
-const __ELIVE_VERSION__ = "0.0.0-development;"
+
+(function(l, i, v, e) { v = l.createElement(i); v.async = 1; v.src = '//' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; e = l.getElementsByTagName(i)[0]; e.parentNode.insertBefore(v, e)})(document, 'script');
+const __VERSION__ = "3.1.0"; const __ENV__="dev";
 
 var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -3001,3 +3002,4 @@ ELive.version = __VERSION__;
 ELive.env = __ENV__;
 
 export default ELive;
+//# sourceMappingURL=ELive.mjs.map

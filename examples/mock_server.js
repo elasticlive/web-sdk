@@ -33,8 +33,8 @@ const senderStream = new MediaStream();
 let audioTrack;
 let pcList = {};
 let curPc;
-var audioContext;
-var audioSource;
+let audioContext;
+let audioSource;
 const remoteAudioElement = document.querySelector("#remoteAudio");
 
 con.onopen = function(event) {
@@ -189,13 +189,13 @@ function gotIceEvents(event) {
     runtimeStatus = 0;
 
     audioSource = audioContext.createMediaStreamSource(senderStream);
-    var biquadFilter = audioContext.createBiquadFilter();
+    let biquadFilter = audioContext.createBiquadFilter();
     biquadFilter.type = "lowshelf";
     biquadFilter.frequency.value = 1000;
     biquadFilter.gain.value = 35;
     audioSource.connect(biquadFilter);
     // biquadFilter.connect(audioContext.destination)
-    var filteredStream = audioContext.createMediaStreamDestination();
+    let filteredStream = audioContext.createMediaStreamDestination();
     senderStream.addTrack(filteredStream.stream.getAudioTracks()[0]);
     // remoteAudioElement.srcObject = new MediaStream(filteredStream.stream.getAudioTracks())
     // senderStream.addTrack(remoteAudioElement.audioTracks[0])
@@ -236,7 +236,7 @@ function createInitMsg() {
   return {
     command: "register",
     token: id,
-    member: member
+    member
   };
 }
 
@@ -250,22 +250,22 @@ function uuidv4() {
 }
 
 function deleteExt(sdp) {
-  var lines = sdp.split("\n");
-  var line = 1;
-  for (var i = 0; i < lines.length; i++) {
+  let lines = sdp.split("\n");
+  let line = 1;
+  for (let i = 0; i < lines.length; i++) {
     if (lines[i].indexOf("m=video") === 0) {
       line = i;
       break;
     }
   }
-  for (var i = line; i < lines.length; i++) {
+  for (let i = line; i < lines.length; i++) {
     if (lines[i].indexOf("a=extmap") === 0) {
       line = i;
       lines.splice(line, 9);
       break;
     }
   }
-  for (var i = line; i < lines.length; i++) {
+  for (let i = line; i < lines.length; i++) {
     if (lines[i].indexOf("ccm fir") > 0) {
       line = i;
       lines.splice(line, 1);
@@ -275,11 +275,11 @@ function deleteExt(sdp) {
   return lines.join("\n");
 }
 function replaceAlias(sdp) {
-  var lines = sdp.split("\n");
-  var line = 0;
-  for (var i = 0; i < lines.length; i++) {
+  let lines = sdp.split("\n");
+  let line = 0;
+  for (let i = 0; i < lines.length; i++) {
     if (lines[i].indexOf("WMS") > 0) {
-      lines[i] = "a=msid-semantic: WMS slime";
+      lines[i] = "a=msid-semantic: WMS member";
       break;
     }
   }
@@ -287,9 +287,9 @@ function replaceAlias(sdp) {
 }
 
 function setMediaBitrate(sdp, media, bitrate) {
-  var lines = sdp.split("\n");
-  var line = -1;
-  for (var i = 0; i < lines.length; i++) {
+  let lines = sdp.split("\n");
+  let line = -1;
+  for (let i = 0; i < lines.length; i++) {
     if (lines[i].indexOf("m=" + media) === 0) {
       line = i;
       break;
@@ -318,14 +318,14 @@ function setMediaBitrate(sdp, media, bitrate) {
 
   // Add a new b line
   console.debug("Adding new b line before line", line);
-  var newLines = lines.slice(0, line);
+  let newLines = lines.slice(0, line);
   newLines.push("b=AS:" + bitrate);
   newLines = newLines.concat(lines.slice(line, lines.length));
   return newLines.join("\n");
 }
 
 function replaceCodec(sdp, mLineReg, preferCodec) {
-  var mLine,
+  let mLine,
     newMLine = [],
     sdpCodec,
     mLineSplit,
@@ -350,7 +350,7 @@ function replaceCodec(sdp, mLineReg, preferCodec) {
   newMLine.push(mLineSplit[2]);
   newMLine.push(sdpCodec);
 
-  for (var i = 3; i < mLineSplit.length; i++) {
+  for (let i = 3; i < mLineSplit.length; i++) {
     if (mLineSplit[i] !== sdpCodec) {
       newMLine.push(mLineSplit[i]);
     }

@@ -1,11 +1,12 @@
-// https://elasticlive.io v0.0.0-development Copyright 2019 RemoteMonster
+
+(function(l, i, v, e) { v = l.createElement(i); v.async = 1; v.src = '//' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; e = l.getElementsByTagName(i)[0]; e.parentNode.insertBefore(v, e)})(document, 'script');
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
 	typeof define === 'function' && define.amd ? define(factory) :
 	(global = global || self, global.ELive = factory());
 }(this, function () { 'use strict';
 
-	const __ELIVE_VERSION__ = "0.0.0-development;"
+	const __VERSION__ = "3.1.0"; const __ENV__="dev";
 
 	var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -3009,3 +3010,4 @@
 	return ELive;
 
 }));
+//# sourceMappingURL=ELive.js.map
