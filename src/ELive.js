@@ -5,6 +5,7 @@ import EventEmitter from "events";
 
 import Context from "./Context";
 import Signal from "./Signal";
+import ELiveError from "./Error";
 import auth from "./Auth";
 import Config from "./Config";
 import l from "./Logger";
@@ -58,9 +59,11 @@ class ELive extends EventEmitter {
    */
   constructor(config) {
     super();
-    /**@ignore */
-    this.version = __VERSION__;
-    if (!config) config = {};
+    try {
+      /**@ignore */
+      this.version = __VERSION__;
+    } catch (e) {}
+    if (!config) throw new ELiveError({ code: "1200" });
     // if (config.sdk && config.sdk.mode === "dev")
     //   config.sdk.url = { sig: "ws://localhost:1235/sig" };
     /**@ignore */
@@ -315,7 +318,12 @@ class ELive extends EventEmitter {
     return status;
   }
 }
+try {
+  ELive.version = __VERSION__;
+  ELive.env = __ENV__;
+} catch (e) {
+  ELive.version = "3.0.0";
+  ELive.env = {};
+}
 
-ELive.version = __VERSION__;
-ELive.env = __ENV__;
 export default ELive;

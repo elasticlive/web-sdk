@@ -3414,7 +3414,7 @@ class ELive extends events {
     super();
     /**@ignore */
     this.version = __VERSION__;
-    if (!config$1) config$1 = {};
+    if (!config$1) throw new Error({ code: "1200" });
     // if (config.sdk && config.sdk.mode === "dev")
     //   config.sdk.url = { sig: "ws://localhost:1235/sig" };
     /**@ignore */
@@ -3669,9 +3669,13 @@ class ELive extends events {
     return status;
   }
 }
-
-ELive.version = __VERSION__;
-ELive.env = __ENV__;
+try {
+  ELive.version = __VERSION__;
+  ELive.env = __ENV__;
+} catch (e) {
+  ELive.version = "3.0.0";
+  ELive.env = {};
+}
 
 export default ELive;
 //# sourceMappingURL=ELive.mjs.map
