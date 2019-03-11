@@ -1,3 +1,16 @@
+# [3.3.0](https://github.com/elasticlive/web-sdk/compare/v3.2.0...v3.3.0) (2019-03-11)
+
+
+### Bug Fixes
+
+* All error should include code and text field [#1](https://github.com/elasticlive/web-sdk/issues/1) ([6f19a14](https://github.com/elasticlive/web-sdk/commit/6f19a14))
+* change SlimeError to ELiveError ([e22a8ae](https://github.com/elasticlive/web-sdk/commit/e22a8ae))
+
+
+### Features
+
+* **test:** added config test ([6d683df](https://github.com/elasticlive/web-sdk/commit/6d683df))
+
 # [3.2.0](https://github.com/elasticlive/web-sdk/compare/v3.1.0...v3.2.0) (2019-03-08)
 
 
