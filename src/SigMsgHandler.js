@@ -175,7 +175,10 @@ function SigMsgHandler(ctx) {
           l.i("remote description is set");
         })
         .catch(e => {
-          throw new EliveError("remote description is wrong");
+          throw new EliveError({
+            code: "1300",
+            text: "remote description is wrong"
+          });
         });
 
       if (desc.type === "offer") {
@@ -198,7 +201,10 @@ function SigMsgHandler(ctx) {
             });
           })
           .catch(e => {
-            throw new EliveError("failed to create answer", e);
+            throw new EliveError(
+              { code: "1300", text: "failed to create answer" },
+              e
+            );
           });
       }
     },
@@ -342,7 +348,7 @@ function SigMsgHandler(ctx) {
       ctx.state = "FAIL";
       ctx.endTime = new Date().getTime();
       l.t(ctx, util.makeTransactionLog(ctx));
-      throw new EliveError("ice connecting is failed");
+      throw new EliveError({ code: "1300", text: "ice connecting is failed" });
     } else if (ctx.peerConnection.iceConnectionState === "disconnected") {
       // 상대 peer에 의해 rtc con이 종료되었을 경우
       if (ctx.state !== "CLOSE") {
@@ -381,7 +387,10 @@ function SigMsgHandler(ctx) {
         ctx.state = "FAIL";
         ctx.endTime = new Date().getTime();
         l.t(ctx, util.makeTransactionLog(ctx));
-        throw new EliveError("ice connecting is failed");
+        throw new EliveError({
+          code: "1300",
+          text: "ice connecting is failed"
+        });
         break;
       case "disconnected": // 상대 peer에 의해 rtc con이 종료되었을 경우
         if (ctx.state !== "CLOSE") {

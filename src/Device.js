@@ -61,7 +61,7 @@ export default class Device {
       this.ctx.devices.videoInput.length === 0 ||
       this.ctx.devices.audioInput.length === 0
     ) {
-      throw new ELiveError("there is no input device");
+      throw new ELiveError({ code: "1500", text: "there is no input device" });
     }
     if (
       this.ctx.devices.currentVideoInput === -1 &&
@@ -98,9 +98,10 @@ export default class Device {
     l.d("start to set video input with " + deviceId);
     const devNumber = this.findDevice(deviceId, this.ctx.devices.videoInput);
     if (devNumber == -1) {
-      throw new ELiveError(
-        "incorrect video device. input a right video device id."
-      );
+      throw new ELiveError({
+        code: "1500",
+        text: "incorrect video device. input a right video device id."
+      });
       return;
     }
     this.ctx.devices.currentVideoInput = devNumber;
@@ -114,9 +115,10 @@ export default class Device {
     l.d("start to set audio input with " + deviceId);
     const devNumber = this.findDevice(deviceId, this.ctx.devices.audioInput);
     if (devNumber == -1) {
-      throw new ELiveError(
-        "incorrect audio device. input a right audio device id."
-      );
+      throw new ELiveError({
+        code: "1500",
+        text: "incorrect audio device. input a right audio device id."
+      });
       return;
     }
     this.ctx.devices.currentAudioInput = devNumber;
@@ -163,7 +165,8 @@ export default class Device {
       this.setVideoInput(deviceId);
     }
     stream = await navigator.mediaDevices.getUserMedia(this.ctx.config.media);
-    if (!stream) throw new ELiveError("can not get user media");
+    if (!stream)
+      throw new ELiveError({ code: "1500", text: "can not get user media" });
     // if (this.ctx.config.media.video && this.ctx.config.media.video !==false) {
     this.ctx.localVideo.srcObject = stream; //localVideo는 이제 localMedia로 이름을 바꾸는 것이 나을 듯.
     // }

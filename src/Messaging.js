@@ -18,7 +18,10 @@ export default class Messaging {
       })
       .catch(e => {
         console.error(e);
-        throw new ELiveError("remote description for dc is wrong");
+        throw new ELiveError({
+          code: "1300",
+          text: "remote description for dc is wrong"
+        });
       });
 
     if (desc.type === "offer") {
@@ -37,7 +40,10 @@ export default class Messaging {
           });
         })
         .catch(e => {
-          throw new ELiveError("failed to create answer for dc", e);
+          throw new ELiveError(
+            { code: "1300", text: "failed to create answer for dc" },
+            e
+          );
         });
     }
   }
@@ -57,7 +63,10 @@ export default class Messaging {
       })
       .catch(e => {
         console.error(e);
-        throw new ELiveError("remote description(answer) is wrong");
+        throw new ELiveError({
+          code: "1300",
+          text: "remote description(answer) is wrong"
+        });
       });
   }
   startOffer() {

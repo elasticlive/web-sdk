@@ -63,7 +63,8 @@ class ELive extends EventEmitter {
       /**@ignore */
       this.version = __VERSION__;
     } catch (e) {}
-    if (!config) throw new ELiveError({ code: "1200" });
+    if (!config)
+      throw new ELiveError({ code: "1200", text: "no config object" });
     // if (config.sdk && config.sdk.mode === "dev")
     //   config.sdk.url = { sig: "ws://localhost:1235/sig" };
     /**@ignore */

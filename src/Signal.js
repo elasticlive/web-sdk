@@ -23,7 +23,7 @@ class Signal extends EventEmitter {
       this.ctx.callEvent({ name: "init", param: {} });
     };
     this.ws.onerror = e => {
-      throw new ELiveError("websocket is failed", e);
+      throw new ELiveError({ code: "1400", text: "websocket is failed" }, e);
     };
     this.ws.onclose = e => {
       l.i("websocket is closed");
@@ -70,7 +70,7 @@ class Signal extends EventEmitter {
     try {
       this.ws.send(m);
     } catch (e) {
-      throw new ELiveError("send error", e);
+      throw new ELiveError({ code: "1400", text: "send error" }, e);
     }
   }
 

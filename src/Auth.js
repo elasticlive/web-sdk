@@ -57,17 +57,19 @@ export default async function Auth(ctx) {
     });
   } catch (e) {
     console.error(e);
-    throw new EliveError(
-      `Auth is failed with id:${ctx.config.credential.serviceId}/ key:${
+    throw new EliveError({
+      code: 1600,
+      text: `Auth is failed with id:${ctx.config.credential.serviceId}/ key:${
         ctx.config.credential.key
       }`
-    );
+    });
   }
   if (!ctx.token)
-    throw new EliveError(
-      `failed to auth with id: ${ctx.config.credential.serviceId} and key: ${
-        ctx.config.credential.key
-      }`
-    );
+    throw new EliveError({
+      code: 1600,
+      text: `failed to auth with id: ${
+        ctx.config.credential.serviceId
+      } and key: ${ctx.config.credential.key}`
+    });
   l.d("success auth");
 }
