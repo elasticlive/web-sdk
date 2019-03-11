@@ -8,10 +8,10 @@ describe("config", () => {
       try {
         const elive = new ELive();
       } catch (e) {
-        console.log(JSON.stringify(e));
         assert.equal(e.code, "1200");
+        return;
       }
-      throw new Error("no config");
+      throw new Error("no config but passed");
     });
   });
 });
