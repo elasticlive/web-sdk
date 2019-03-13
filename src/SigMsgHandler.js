@@ -75,6 +75,13 @@ function SigMsgHandler(ctx) {
         });
     },
     onCast(msg) {
+      if (!msg.status.startsWith("20")) {
+        ctx.callEvent({
+          name: "error",
+          param: new EliveError({ code: msg.status, text: msg.desc })
+        });
+        return;
+      }
       l.i(`start onCast with chid: ${msg.channel.id}`);
       ctx.channel = msg.channel;
       ctx.callEvent({ name: "onCast", param: { channel: ctx.channel } });
