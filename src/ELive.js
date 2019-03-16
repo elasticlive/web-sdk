@@ -129,9 +129,9 @@ class ELive extends EventEmitter {
     this.ctx.remoteMedia = document.querySelector(
       "#" + this.ctx.config.view.remote
     );
-    this.ctx.remoteMedia2 = document.querySelector(
-      "#" + this.ctx.config.view.remote2
-    );
+    // this.ctx.remoteMedia2 = document.querySelector(
+    //   "#" + this.ctx.config.view.remote2
+    // );
     await auth(this.ctx);
     await this.ctx.signaler.init();
     this.ctx.signaler.watch(name);

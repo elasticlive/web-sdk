@@ -20,7 +20,7 @@ describe("ELive.constructor", () => {
     try {
       elive = new ELive(config);
     } catch (e) {
-      console.error(e);
+      // console.error(e);
     }
     // assert(elive.ctx.config.rtc.opt, 'rtc.opt is null for music mode');
   });
