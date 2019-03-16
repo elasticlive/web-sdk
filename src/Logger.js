@@ -1,4 +1,3 @@
-// TODO: change live to ...
 const logger = (() => {
   const logLevelPreset = [
     "SILENT",
@@ -18,6 +17,9 @@ const logger = (() => {
     url = ctx.config.sdk.url.log;
   }
 
+  /**
+   * Log a ERROR message to console log
+   */
   function e(...message) {
     if (level === "SILENT") {
       return;
@@ -25,6 +27,10 @@ const logger = (() => {
     console.error(...message);
   }
 
+  /**
+   * Log a WARN message to console log.
+   * @param  {...any} message 
+   */
   function w(...message) {
     if (level === "SILENT" || level === "ERROR") {
       return;
@@ -32,10 +38,18 @@ const logger = (() => {
     console.warn(...message);
   }
 
+  /**
+   * Log a INFO message to console.log. It is default level.
+   * @param  {...any} message 
+   */
   function l(...message) {
     i(...message);
   }
 
+  /**
+   * Log a INFO message to console log. It is default level.
+   * @param  {...any} message 
+   */
   function i(...message) {
     if (level === "SILENT" || level === "ERROR" || level === "WARN") {
       return;
@@ -43,6 +57,11 @@ const logger = (() => {
     console.info(...message);
   }
 
+  /**
+   * Log a transaction message to elasticlive server.
+   * @param {*} ctx 
+   * @param {*} message 
+   */
   function t(ctx, message) {
     if (ctx.role === "CALLER" || ctx.role === "CASTOR") return;
     fetch(ctx.config.sdk.url.channelLog, {
@@ -54,6 +73,38 @@ const logger = (() => {
     });
   }
 
+  /**
+   * Log a message to elasticlive log server
+   * @param  {...any} message 
+   */
+  function evt(...message, errorCode) {
+    const evtMsg = {
+      topic: "log",
+      messages: {
+        log: message,
+        logLevel: errorCode?"error":"info",
+        sdkVersion: ctx.version,
+        svcId: ctx.serviceId,
+        pId: ctx.token,
+        chId: ctx.channel.id,
+        errorCode: errorCode|| "2000"
+      }
+    }
+    fetch(ctx.config.sdk.url.log, {
+      method: "PUT",
+      mode: "cors",
+      headers: {
+        "Content-Type": "application/json; charset=utf-8",
+        "Access-Control-Allow-Origin": "*"
+      },
+      body: JSON.stringify(evtMsg)
+    });
+  }
+
+  /**
+   * Log a debug message to console log
+   * @param  {...any} message 
+   */
   function d(...message) {
     if (
       level === "SILENT" ||
@@ -65,7 +116,10 @@ const logger = (() => {
     }
     console.debug(...message);
   }
-
+  /**
+   * Log a verbose message to console log. It is most detailed log method.
+   * @param  {...any} object 
+   */
   function v(...object) {
     if (
       level === "SILENT" ||
@@ -87,7 +141,8 @@ const logger = (() => {
     i,
     d,
     v,
-    t
+    t,
+    evt
   });
 })();
 
