@@ -75,7 +75,7 @@ function SigMsgHandler(ctx) {
         });
     },
     onCast(msg) {
-      if (!msg.status.startsWith("20")) {
+      if (msg.status > 3099) {
         ctx.callEvent({
           name: "error",
           param: new EliveError({ code: msg.status, text: msg.desc })

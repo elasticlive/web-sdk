@@ -29,7 +29,7 @@ const logger = (() => {
 
   /**
    * Log a WARN message to console log.
-   * @param  {...any} message 
+   * @param  {...any} message
    */
   function w(...message) {
     if (level === "SILENT" || level === "ERROR") {
@@ -40,7 +40,7 @@ const logger = (() => {
 
   /**
    * Log a INFO message to console.log. It is default level.
-   * @param  {...any} message 
+   * @param  {...any} message
    */
   function l(...message) {
     i(...message);
@@ -48,7 +48,7 @@ const logger = (() => {
 
   /**
    * Log a INFO message to console log. It is default level.
-   * @param  {...any} message 
+   * @param  {...any} message
    */
   function i(...message) {
     if (level === "SILENT" || level === "ERROR" || level === "WARN") {
@@ -59,8 +59,8 @@ const logger = (() => {
 
   /**
    * Log a transaction message to elasticlive server.
-   * @param {*} ctx 
-   * @param {*} message 
+   * @param {*} ctx
+   * @param {*} message
    */
   function t(ctx, message) {
     if (ctx.role === "CALLER" || ctx.role === "CASTOR") return;
@@ -75,21 +75,21 @@ const logger = (() => {
 
   /**
    * Log a message to elasticlive log server
-   * @param  {...any} message 
+   * @param  {...any} message
    */
-  function evt(...message, errorCode) {
+  function evt(message, errorCode) {
     const evtMsg = {
       topic: "log",
       messages: {
         log: message,
-        logLevel: errorCode?"error":"info",
+        logLevel: errorCode ? "error" : "info",
         sdkVersion: ctx.version,
         svcId: ctx.serviceId,
         pId: ctx.token,
         chId: ctx.channel.id,
-        errorCode: errorCode|| "2000"
+        errorCode: errorCode || "2000"
       }
-    }
+    };
     fetch(ctx.config.sdk.url.log, {
       method: "PUT",
       mode: "cors",
@@ -103,7 +103,7 @@ const logger = (() => {
 
   /**
    * Log a debug message to console log
-   * @param  {...any} message 
+   * @param  {...any} message
    */
   function d(...message) {
     if (
@@ -118,7 +118,7 @@ const logger = (() => {
   }
   /**
    * Log a verbose message to console log. It is most detailed log method.
-   * @param  {...any} object 
+   * @param  {...any} object
    */
   function v(...object) {
     if (
