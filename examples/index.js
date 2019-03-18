@@ -4,7 +4,8 @@ const config = {
     key: "27f8ca5ee273153d9a9c5944c766fa097d2e16de4dda425a"
   },
   sdk: {
-    logLevel: "VERBOSE"
+    logLevel: "VERBOSE",
+    coachId: "KR-ELIVE-COACH-1"
     // mode: "dev"
     // audioType: 'music'
   },

@@ -16,8 +16,8 @@ export default class Context {
     this.localVideo;
     this.remoteMedia;
     this.remoteMedia2;
-    this.localStream = new MediaStream();
-    this.remoteStream = new MediaStream();
+    this.localStream; // = new MediaStream();
+    this.remoteStream; // = new MediaStream();
     this.transceivers = null;
     this.devices = {
       currentVideoInput: -1,

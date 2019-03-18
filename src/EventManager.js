@@ -1,17 +1,13 @@
-import SlimeError from './Error'
+import ELiveError from "./Error";
 
 function EventManager() {
-  const definedEvents = [
-    "onEvent",
-    "onAuth",
-    "onDisplayUserMedia"
-  ]
-  const listeners = new Map(definedEvents.map(item => [item]))
+  const definedEvents = ["onEvent", "onAuth", "onDisplayUserMedia"];
+  const listeners = new Map(definedEvents.map(item => [item]));
   function addEventListener({ type, listenerItem }) {
     if (typeof listenerItem !== "function") {
-      throw new SlimeError("EventManager:listenerMustBeAFunction");
+      throw new ELiveError("EventManager:listenerMustBeAFunction");
     } else if (!definedEvents.includes(type)) {
-      throw new SlimeError("EventManager:UnmatchedEvent");
+      throw new ELiveError("EventManager:UnmatchedEvent");
     } else {
       listeners.set(type, listenerItem);
     }
@@ -19,7 +15,7 @@ function EventManager() {
 
   function hasEventListener(type) {
     if (!definedEvents.includes(type)) {
-      throw new SlimeError("EventManager:UnmatchedEvent");
+      throw new ELiveError("EventManager:UnmatchedEvent");
     } else if (typeof listeners.get(type) === "undefined") {
       return false;
     } else {
@@ -31,7 +27,9 @@ function EventManager() {
     if (definedEvents.includes(type) && listeners.has(type)) {
       listeners.set(type, undefined);
     } else {
-      throw new SlimeError("EventManager:UnmatchedEventOrDidNotContainAnylistener");
+      throw new ELiveError(
+        "EventManager:UnmatchedEventOrDidNotContainAnylistener"
+      );
     }
   }
 
@@ -41,7 +39,7 @@ function EventManager() {
 
   function dispatchEvent(type, ...args) {
     if (!definedEvents.includes(type)) {
-      throw new SlimeError("EventManager:UnmatchedEvent");
+      throw new ELiveError("EventManager:UnmatchedEvent");
     } else if (typeof listeners.get(type) === "undefined") {
       return;
     } else {
@@ -55,6 +53,6 @@ function EventManager() {
     removeEventListener,
     getEventListeners,
     dispatchEvent
-  })
+  });
 }
-export default EventManager
+export default EventManager;

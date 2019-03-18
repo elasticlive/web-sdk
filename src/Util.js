@@ -9,7 +9,7 @@ const util = (() => {
       !ctx.config.credential.key
     ) {
       // l.e('no credential data')
-      throw new EliveError("no credential data");
+      throw new EliveError({ code: "1200", text: "no credential data" });
     }
   }
 

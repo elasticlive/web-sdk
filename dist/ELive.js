@@ -1,13 +1,4 @@
-(function(l, i, v, e) {
-  v = l.createElement(i);
-  v.async = 1;
-  v.src =
-    "//" +
-    (location.host || "localhost").split(":")[0] +
-    ":35729/livereload.js?snipver=1";
-  e = l.getElementsByTagName(i)[0];
-  e.parentNode.insertBefore(v, e);
-})(document, "script");
+// https://elasticlive.io v3.3.0 Copyright 2019 RemoteMonster
 (function(global, factory) {
   typeof exports === "object" && typeof module !== "undefined"
     ? (module.exports = factory())
@@ -17,8 +8,7 @@
 })(this, function() {
   "use strict";
 
-  const __VERSION__ = "3.1.0";
-  const __ENV__ = "dev";
+  const __ELIVE_VERSION__ = "3.3.0;";
 
   var commonjsGlobal =
     typeof window !== "undefined"
@@ -2110,8 +2100,8 @@
       this.localVideo;
       this.remoteMedia;
       this.remoteMedia2;
-      this.localStream = new MediaStream();
-      this.remoteStream = new MediaStream();
+      this.localStream; // = new MediaStream();
+      this.remoteStream; // = new MediaStream();
       this.transceivers = null;
       this.devices = {
         currentVideoInput: -1,
@@ -2140,7 +2130,6 @@
     }
   }
 
-  // TODO: change live to ...
   const logger = (() => {
     let level;
     let ctx;
@@ -2152,6 +2141,9 @@
       url = ctx.config.sdk.url.log;
     }
 
+    /**
+     * Log a ERROR message to console log
+     */
     function e(...message) {
       if (level === "SILENT") {
         return;
@@ -2159,6 +2151,10 @@
       console.error(...message);
     }
 
+    /**
+     * Log a WARN message to console log.
+     * @param  {...any} message
+     */
     function w(...message) {
       if (level === "SILENT" || level === "ERROR") {
         return;
@@ -2166,10 +2162,18 @@
       console.warn(...message);
     }
 
+    /**
+     * Log a INFO message to console.log. It is default level.
+     * @param  {...any} message
+     */
     function l(...message) {
       i(...message);
     }
 
+    /**
+     * Log a INFO message to console log. It is default level.
+     * @param  {...any} message
+     */
     function i(...message) {
       if (level === "SILENT" || level === "ERROR" || level === "WARN") {
         return;
@@ -2177,6 +2181,11 @@
       console.info(...message);
     }
 
+    /**
+     * Log a transaction message to elasticlive server.
+     * @param {*} ctx
+     * @param {*} message
+     */
     function t(ctx, message) {
       if (ctx.role === "CALLER" || ctx.role === "CASTOR") return;
       fetch(ctx.config.sdk.url.channelLog, {
@@ -2188,6 +2197,38 @@
       });
     }
 
+    /**
+     * Log a message to elasticlive log server
+     * @param  {...any} message
+     */
+    function evt(message, errorCode) {
+      const evtMsg = {
+        topic: "log",
+        messages: {
+          log: message,
+          logLevel: errorCode ? "error" : "info",
+          sdkVersion: ctx.version,
+          svcId: ctx.serviceId,
+          pId: ctx.token,
+          chId: ctx.channel.id,
+          errorCode: errorCode || "2000"
+        }
+      };
+      fetch(ctx.config.sdk.url.log, {
+        method: "PUT",
+        mode: "cors",
+        headers: {
+          "Content-Type": "application/json; charset=utf-8",
+          "Access-Control-Allow-Origin": "*"
+        },
+        body: JSON.stringify(evtMsg)
+      });
+    }
+
+    /**
+     * Log a debug message to console log
+     * @param  {...any} message
+     */
     function d(...message) {
       if (
         level === "SILENT" ||
@@ -2199,7 +2240,10 @@
       }
       console.debug(...message);
     }
-
+    /**
+     * Log a verbose message to console log. It is most detailed log method.
+     * @param  {...any} object
+     */
     function v(...object) {
       if (
         level === "SILENT" ||
@@ -2221,14 +2265,17 @@
       i,
       d,
       v,
-      t
+      t,
+      evt
     });
   })();
 
-  class SlimeError extends Error {
+  class ELiveError extends Error {
     constructor(message, e) {
-      super(message);
+      super(message.text);
       this.name = "ELiveError";
+      this.code = message.code;
+      this.text = message.text;
       if (e) console.error(e);
     }
   }
@@ -2250,7 +2297,10 @@
         })
         .catch(e => {
           console.error(e);
-          throw new SlimeError("remote description for dc is wrong");
+          throw new ELiveError({
+            code: "1300",
+            text: "remote description for dc is wrong"
+          });
         });
 
       if (desc.type === "offer") {
@@ -2269,7 +2319,10 @@
             });
           })
           .catch(e => {
-            throw new SlimeError("failed to create answer for dc", e);
+            throw new ELiveError(
+              { code: "1300", text: "failed to create answer for dc" },
+              e
+            );
           });
       }
     }
@@ -2289,7 +2342,10 @@
         })
         .catch(e => {
           console.error(e);
-          throw new SlimeError("remote description(answer) is wrong");
+          throw new ELiveError({
+            code: "1300",
+            text: "remote description(answer) is wrong"
+          });
         });
     }
     startOffer() {
@@ -2339,7 +2395,7 @@
         !ctx.config.credential.key
       ) {
         // l.e('no credential data')
-        throw new SlimeError("no credential data");
+        throw new ELiveError({ code: "1200", text: "no credential data" });
       }
     }
 
@@ -2508,6 +2564,13 @@
           });
       },
       onCast(msg) {
+        if (msg.status > 3099) {
+          ctx.callEvent({
+            name: "error",
+            param: new ELiveError({ code: msg.status, text: msg.desc })
+          });
+          return;
+        }
         logger.i(`start onCast with chid: ${msg.channel.id}`);
         ctx.channel = msg.channel;
         ctx.callEvent({ name: "onCast", param: { channel: ctx.channel } });
@@ -2608,7 +2671,10 @@
             logger.i("remote description is set");
           })
           .catch(e => {
-            throw new SlimeError("remote description is wrong");
+            throw new ELiveError({
+              code: "1300",
+              text: "remote description is wrong"
+            });
           });
 
         if (desc.type === "offer") {
@@ -2631,7 +2697,10 @@
               });
             })
             .catch(e => {
-              throw new SlimeError("failed to create answer", e);
+              throw new ELiveError(
+                { code: "1300", text: "failed to create answer" },
+                e
+              );
             });
         }
       },
@@ -2778,7 +2847,10 @@
         ctx.state = "FAIL";
         ctx.endTime = new Date().getTime();
         logger.t(ctx, util.makeTransactionLog(ctx));
-        throw new SlimeError("ice connecting is failed");
+        throw new ELiveError({
+          code: "1300",
+          text: "ice connecting is failed"
+        });
       } else if (ctx.peerConnection.iceConnectionState === "disconnected") {
         // 상대 peer에 의해 rtc con이 종료되었을 경우
         if (ctx.state !== "CLOSE") {
@@ -2820,7 +2892,10 @@
           ctx.state = "FAIL";
           ctx.endTime = new Date().getTime();
           logger.t(ctx, util.makeTransactionLog(ctx));
-          throw new SlimeError("ice connecting is failed");
+          throw new ELiveError({
+            code: "1300",
+            text: "ice connecting is failed"
+          });
           break;
         case "disconnected": // 상대 peer에 의해 rtc con이 종료되었을 경우
           if (ctx.state !== "CLOSE") {
@@ -2877,7 +2952,7 @@
         this.ctx.callEvent({ name: "init", param: {} });
       };
       this.ws.onerror = e => {
-        throw new SlimeError("websocket is failed", e);
+        throw new ELiveError({ code: "1400", text: "websocket is failed" }, e);
       };
       this.ws.onclose = e => {
         logger.i("websocket is closed");
@@ -2924,7 +2999,7 @@
       try {
         this.ws.send(m);
       } catch (e) {
-        throw new SlimeError("send error", e);
+        throw new ELiveError({ code: "1400", text: "send error" }, e);
       }
     }
 
@@ -3023,18 +3098,20 @@
       });
     } catch (e) {
       console.error(e);
-      throw new SlimeError(
-        `Auth is failed with id:${ctx.config.credential.serviceId}/ key:${
+      throw new ELiveError({
+        code: 1600,
+        text: `Auth is failed with id:${ctx.config.credential.serviceId}/ key:${
           ctx.config.credential.key
         }`
-      );
+      });
     }
     if (!ctx.token)
-      throw new SlimeError(
-        `failed to auth with id: ${ctx.config.credential.serviceId} and key: ${
-          ctx.config.credential.key
-        }`
-      );
+      throw new ELiveError({
+        code: 1600,
+        text: `failed to auth with id: ${
+          ctx.config.credential.serviceId
+        } and key: ${ctx.config.credential.key}`
+      });
     logger.d("success auth");
   }
 
@@ -3111,7 +3188,7 @@
       sdk: {
         url: {
           // sig: "wss://signal.remotemonster.com/ws",
-          sig: "wss://demo.remotemonster.com/sig",
+          // sig: "wss://demo.remotemonster.com/sig",
           auth: "https://auth.remotemonster.com/auth",
           // auth: "https://signal.remotemonster.com/rest/init",
           log: "https://signal.remotemonster.com:2001/topics",
@@ -3186,7 +3263,10 @@
         this.ctx.devices.videoInput.length === 0 ||
         this.ctx.devices.audioInput.length === 0
       ) {
-        throw new SlimeError("there is no input device");
+        throw new ELiveError({
+          code: "1500",
+          text: "there is no input device"
+        });
       }
       if (
         this.ctx.devices.currentVideoInput === -1 &&
@@ -3223,9 +3303,10 @@
       logger.d("start to set video input with " + deviceId);
       const devNumber = this.findDevice(deviceId, this.ctx.devices.videoInput);
       if (devNumber == -1) {
-        throw new SlimeError(
-          "incorrect video device. input a right video device id."
-        );
+        throw new ELiveError({
+          code: "1500",
+          text: "incorrect video device. input a right video device id."
+        });
         return;
       }
       this.ctx.devices.currentVideoInput = devNumber;
@@ -3239,9 +3320,10 @@
       logger.d("start to set audio input with " + deviceId);
       const devNumber = this.findDevice(deviceId, this.ctx.devices.audioInput);
       if (devNumber == -1) {
-        throw new SlimeError(
-          "incorrect audio device. input a right audio device id."
-        );
+        throw new ELiveError({
+          code: "1500",
+          text: "incorrect audio device. input a right audio device id."
+        });
         return;
       }
       this.ctx.devices.currentAudioInput = devNumber;
@@ -3288,7 +3370,8 @@
         this.setVideoInput(deviceId);
       }
       stream = await navigator.mediaDevices.getUserMedia(this.ctx.config.media);
-      if (!stream) throw new SlimeError("can not get user media");
+      if (!stream)
+        throw new ELiveError({ code: "1500", text: "can not get user media" });
       // if (this.ctx.config.media.video && this.ctx.config.media.video !==false) {
       this.ctx.localVideo.srcObject = stream; //localVideo는 이제 localMedia로 이름을 바꾸는 것이 나을 듯.
       // }
@@ -3446,9 +3529,12 @@
      */
     constructor(config$1) {
       super();
-      /**@ignore */
-      this.version = __VERSION__;
-      if (!config$1) config$1 = {};
+      try {
+        /**@ignore */
+        this.version = __VERSION__;
+      } catch (e) {}
+      if (!config$1)
+        throw new ELiveError({ code: "1200", text: "no config object" });
       // if (config.sdk && config.sdk.mode === "dev")
       //   config.sdk.url = { sig: "ws://localhost:1235/sig" };
       /**@ignore */
@@ -3476,6 +3562,7 @@
      * @param {string} name - name of 1:1 room
      */
     async call(name) {
+      if (!this.ctx.remoteStream) this.ctx.remoteStream = new MediaStream();
       this.ctx.purpose = "P2P";
       if (this.ctx.devices.audioInput.length == 0)
         await this.devManager.validateDevices();
@@ -3493,6 +3580,7 @@
      * @param {string} name - name of broadcast room
      */
     async cast(name) {
+      if (!this.ctx.localStream) this.ctx.localStream = new MediaStream();
       this.ctx.purpose = "CAST";
       if (this.ctx.devices.audioInput.length == 0)
         await this.devManager.validateDevices();
@@ -3509,13 +3597,14 @@
      * @param {string} name - name of broadcast room
      */
     async watch(name) {
+      if (!this.ctx.remoteStream) this.ctx.remoteStream = new MediaStream();
       this.ctx.purpose = "CAST";
       this.ctx.remoteMedia = document.querySelector(
         "#" + this.ctx.config.view.remote
       );
-      this.ctx.remoteMedia2 = document.querySelector(
-        "#" + this.ctx.config.view.remote2
-      );
+      // this.ctx.remoteMedia2 = document.querySelector(
+      //   "#" + this.ctx.config.view.remote2
+      // );
       await Auth(this.ctx);
       await this.ctx.signaler.init();
       this.ctx.signaler.watch(name);
@@ -3704,10 +3793,13 @@
       return status;
     }
   }
-
-  ELive.version = __VERSION__;
-  ELive.env = __ENV__;
+  try {
+    ELive.version = __VERSION__;
+    ELive.env = __ENV__;
+  } catch (e) {
+    ELive.version = "3.0.0";
+    ELive.env = {};
+  }
 
   return ELive;
 });
-//# sourceMappingURL=ELive.js.map

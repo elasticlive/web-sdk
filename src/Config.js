@@ -71,7 +71,7 @@ var config = (() => {
     sdk: {
       url: {
         // sig: "wss://signal.remotemonster.com/ws",
-        sig: "wss://demo.remotemonster.com/sig",
+        // sig: "wss://demo.remotemonster.com/sig",
         auth: "https://auth.remotemonster.com/auth",
         // auth: "https://signal.remotemonster.com/rest/init",
         log: "https://signal.remotemonster.com:2001/topics",

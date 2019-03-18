@@ -5,6 +5,7 @@ import EventEmitter from "events";
 
 import Context from "./Context";
 import Signal from "./Signal";
+import ELiveError from "./Error";
 import auth from "./Auth";
 import Config from "./Config";
 import l from "./Logger";
@@ -58,9 +59,12 @@ class ELive extends EventEmitter {
    */
   constructor(config) {
     super();
-    /**@ignore */
-    this.version = __VERSION__;
-    if (!config) config = {};
+    try {
+      /**@ignore */
+      this.version = __VERSION__;
+    } catch (e) {}
+    if (!config)
+      throw new ELiveError({ code: "1200", text: "no config object" });
     // if (config.sdk && config.sdk.mode === "dev")
     //   config.sdk.url = { sig: "ws://localhost:1235/sig" };
     /**@ignore */
@@ -88,6 +92,7 @@ class ELive extends EventEmitter {
    * @param {string} name - name of 1:1 room
    */
   async call(name) {
+    if (!this.ctx.remoteStream) this.ctx.remoteStream = new MediaStream();
     this.ctx.purpose = "P2P";
     if (this.ctx.devices.audioInput.length == 0)
       await this.devManager.validateDevices();
@@ -105,6 +110,7 @@ class ELive extends EventEmitter {
    * @param {string} name - name of broadcast room
    */
   async cast(name) {
+    if (!this.ctx.localStream) this.ctx.localStream = new MediaStream();
     this.ctx.purpose = "CAST";
     if (this.ctx.devices.audioInput.length == 0)
       await this.devManager.validateDevices();
@@ -121,13 +127,14 @@ class ELive extends EventEmitter {
    * @param {string} name - name of broadcast room
    */
   async watch(name) {
+    if (!this.ctx.remoteStream) this.ctx.remoteStream = new MediaStream();
     this.ctx.purpose = "CAST";
     this.ctx.remoteMedia = document.querySelector(
       "#" + this.ctx.config.view.remote
     );
-    this.ctx.remoteMedia2 = document.querySelector(
-      "#" + this.ctx.config.view.remote2
-    );
+    // this.ctx.remoteMedia2 = document.querySelector(
+    //   "#" + this.ctx.config.view.remote2
+    // );
     await auth(this.ctx);
     await this.ctx.signaler.init();
     this.ctx.signaler.watch(name);
@@ -315,7 +322,12 @@ class ELive extends EventEmitter {
     return status;
   }
 }
+try {
+  ELive.version = __VERSION__;
+  ELive.env = __ENV__;
+} catch (e) {
+  ELive.version = "3.0.0";
+  ELive.env = {};
+}
 
-ELive.version = __VERSION__;
-ELive.env = __ENV__;
 export default ELive;
