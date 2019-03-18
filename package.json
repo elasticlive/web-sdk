@@ -16,13 +16,10 @@
     "precommit": "pretty-quick --staged",
     "prettier": "prettier ./src/*",
     "build:dev": "rollup -c rollup.config.dev.js --watch",
-    "build:production": "rollup -c rollup.config.prod.js",
-    "build:docs": "jsdoc -c .jsdoc.json",
-    "build": "npm run clean && npm run build:production && npm run build:docs",
-    "deploy:npm": "cd release && npm publish --access public",
-    "deploy:gh-pages": "cd release && npm run deploy",
-    "deploy": "npm run deploy:npm && npm run deploy:gh-pages",
-    "semantic-release": "semantic-release"
+    "build:production": "npm run clean:dist && rollup -c rollup.config.prod.js",
+    "build:docs": "npm run clean:docs && jsdoc -c .jsdoc.json",
+    "build": "npm run build:production && npm run build:docs",
+    "semantic-release": "semantic-release --dry-run"
   },
   "keywords": [
     "WebRTC",
