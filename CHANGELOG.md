@@ -1,3 +1,10 @@
+## [3.3.2](https://github.com/elasticlive/web-sdk/compare/v3.3.1...v3.3.2) (2019-03-18)
+
+
+### Bug Fixes
+
+* bug no remoteStream when connect ([7d899ff](https://github.com/elasticlive/web-sdk/commit/7d899ff))
+
 ## [3.3.1](https://github.com/elasticlive/web-sdk/compare/v3.3.0...v3.3.1) (2019-03-17)
 
 
