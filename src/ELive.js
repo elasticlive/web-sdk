@@ -92,6 +92,7 @@ class ELive extends EventEmitter {
    * @param {string} name - name of 1:1 room
    */
   async call(name) {
+    if (!this.ctx.remoteStream) this.ctx.remoteStream = new MediaStream();
     this.ctx.purpose = "P2P";
     if (this.ctx.devices.audioInput.length == 0)
       await this.devManager.validateDevices();
@@ -109,6 +110,7 @@ class ELive extends EventEmitter {
    * @param {string} name - name of broadcast room
    */
   async cast(name) {
+    if (!this.ctx.localStream) this.ctx.localStream = new MediaStream();
     this.ctx.purpose = "CAST";
     if (this.ctx.devices.audioInput.length == 0)
       await this.devManager.validateDevices();
@@ -125,6 +127,7 @@ class ELive extends EventEmitter {
    * @param {string} name - name of broadcast room
    */
   async watch(name) {
+    if (!this.ctx.remoteStream) this.ctx.remoteStream = new MediaStream();
     this.ctx.purpose = "CAST";
     this.ctx.remoteMedia = document.querySelector(
       "#" + this.ctx.config.view.remote
