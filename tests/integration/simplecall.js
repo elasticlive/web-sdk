@@ -1,7 +1,7 @@
 "use strict";
 require(".")({
-  name: "SimpleCast",
-  path: "./test/integration/simplecast",
+  name: "SimpleCall",
+  path: "./tests/integration/simplecall",
   host: "localhost",
   port: 5000,
   timeout: 10000

@@ -1,0 +1,8 @@
+{
+  "require": [
+    "isomorphic-fetch",
+    "babel-register",
+    "babel-polyfill"
+  ],
+  "reporter": "spec"
+}
