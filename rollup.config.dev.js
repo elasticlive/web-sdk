@@ -29,7 +29,7 @@ export default {
       include: "node_modules/**"
     }),
     serve({
-      contentBase: ["dist", "examples"],
+      contentBase: ["dist", "public"],
       port: 9099
     }),
     livereload("dist")
