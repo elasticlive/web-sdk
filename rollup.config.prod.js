@@ -37,7 +37,7 @@ export default [{
       file: "dist/ELive.js",
       name: "ELive",
       banner: copyright,
-      intro: `const __ELIVE_VERSION__ = "${meta.version};"`
+      intro: `const __VERSION__ = "${meta.version}"; const __ENV__="prod"`
     }, {
       format: "es",
       file: "dist/ELive.mjs",
