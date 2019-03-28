@@ -1,3 +1,10 @@
+## [3.3.3](https://github.com/elasticlive/web-sdk/compare/v3.3.2...v3.3.3) (2019-03-28)
+
+
+### Bug Fixes
+
+* Add check remoteStream is null when close() ([f11d279](https://github.com/elasticlive/web-sdk/commit/f11d279))
+
 ## [3.3.2](https://github.com/elasticlive/web-sdk/compare/v3.3.1...v3.3.2) (2019-03-18)
 
 ### Bug Fixes

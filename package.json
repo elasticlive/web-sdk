@@ -1,6 +1,6 @@
 {
   "name": "@elasticlive/sdk",
-  "version": "3.3.2",
+  "version": "3.3.3",
   "description": "elasticlive",
   "main": "dist/ELive.min.js",
   "module": "dist/ELive.min.mjs",
