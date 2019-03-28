@@ -1,5 +1,15 @@
-// https://elasticlive.io v3.3.0 Copyright 2019 RemoteMonster
-const __ELIVE_VERSION__ = "3.3.0;";
+(function(l, i, v, e) {
+  v = l.createElement(i);
+  v.async = 1;
+  v.src =
+    "//" +
+    (location.host || "localhost").split(":")[0] +
+    ":35729/livereload.js?snipver=1";
+  e = l.getElementsByTagName(i)[0];
+  e.parentNode.insertBefore(v, e);
+})(document, "script");
+const __VERSION__ = "3.3.1";
+const __ENV__ = "dev";
 
 var commonjsGlobal =
   typeof window !== "undefined"
@@ -3589,9 +3599,10 @@ class ELive extends events {
     if (!this.ctx.peerConnection) return;
     this.ctx.peerConnection.close();
     this.ctx.peerConnection = null;
-    this.ctx.remoteStream
-      .getTracks()
-      .forEach(t => this.ctx.remoteStream.removeTrack(t));
+    if (this.ctx.remoteStream)
+      this.ctx.remoteStream
+        .getTracks()
+        .forEach(t => this.ctx.remoteStream.removeTrack(t));
     this.ctx.transceivers = null;
     this.ctx.callEvent({
       name: "onClose",
@@ -3761,3 +3772,4 @@ try {
 }
 
 export default ELive;
+//# sourceMappingURL=ELive.mjs.map

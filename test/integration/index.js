@@ -1,5 +1,4 @@
 "use strict";
-
 const { spawn } = require("child_process");
 const waitForServer = require("./waitforserver");
 const webdriver = require("./webdriver");

@@ -159,9 +159,10 @@ class ELive extends EventEmitter {
     if (!this.ctx.peerConnection) return;
     this.ctx.peerConnection.close();
     this.ctx.peerConnection = null;
-    this.ctx.remoteStream
-      .getTracks()
-      .forEach(t => this.ctx.remoteStream.removeTrack(t));
+    if (this.ctx.remoteStream)
+      this.ctx.remoteStream
+        .getTracks()
+        .forEach(t => this.ctx.remoteStream.removeTrack(t));
     this.ctx.transceivers = null;
     this.ctx.callEvent({
       name: "onClose",
