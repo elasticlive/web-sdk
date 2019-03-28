@@ -1,7 +1,6 @@
 [![npm](https://img.shields.io/npm/v/@elasticlive/sdk.svg)](https://www.npmjs.com/package/@elasticlive/sdk)
 [![CircleCI](https://circleci.com/gh/elasticlive/web-sdk.svg?style=svg)](https://circleci.com/gh/elasticlive/web-sdk)
 
-
 # elasticlive web SDK
 
 elasticlive - WebRTC Live Streming Cloud platform
@@ -21,7 +20,7 @@ npm i webrtc-adapter      #Optional lib for legacy WebRTC API support
 <!-- Optional lib for legacy WebRTC API support -->
 <script src="node_modules/webrtc-adapter/out/adapter.js"></script>
 
-<script src="node_modules/@elasticlive/sdk/dist/elive.min.js"></script>
+<script src="node_modules/@elasticlive/sdk/dist/ELive.min.js"></script>
 ```
 
 ### Static import
@@ -33,10 +32,10 @@ From [jsDelivr](https://www.jsdelivr.com)
 <script src="https://cdn.jsdelivr.net/npm/webrtc-adapter/out/adapter.js"></script>
 
 <!-- Latest -->
-<script src="https://cdn.jsdelivr.net/npm/@elasticlive/sdk/dist/elive.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@elasticlive/sdk"></script>
 
 <!-- Specific version -->
-<script src="https://cdn.jsdelivr.net/npm/@elasticlive/sdk@3.0.0/dist/elive.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@elasticlive/sdk@3.0.0/dist/ELive.min.js"></script>
 ```
 
 ## Examples

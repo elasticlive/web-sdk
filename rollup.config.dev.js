@@ -6,7 +6,8 @@ import * as meta from "./package.json";
 
 export default {
   input: "src/ELive.js",
-  output: [{
+  output: [
+    {
       file: "dist/ELive.js",
       format: "umd",
       name: "ELive",
@@ -23,13 +24,13 @@ export default {
   plugins: [
     resolve({
       // FIXME: https://github.com/rollup/rollup-plugin-node-resolve/issues/196
-      preferBuiltins: false,
+      preferBuiltins: false
     }),
     commonjs({
       include: "node_modules/**"
     }),
     serve({
-      contentBase: ["dist", "examples"],
+      contentBase: ["dist", "public"],
       port: 9099
     }),
     livereload("dist")
