@@ -1,3 +1,10 @@
+## [3.3.4](https://github.com/elasticlive/web-sdk/compare/v3.3.3...v3.3.4) (2019-04-01)
+
+
+### Bug Fixes
+
+* internal version report. now sync with package.json's version ([d7df400](https://github.com/elasticlive/web-sdk/commit/d7df400))
+
 ## [3.3.3](https://github.com/elasticlive/web-sdk/compare/v3.3.2...v3.3.3) (2019-03-28)
 
 
