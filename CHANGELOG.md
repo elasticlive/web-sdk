@@ -1,3 +1,10 @@
+## [3.3.5](https://github.com/elasticlive/web-sdk/compare/v3.3.4...v3.3.5) (2019-04-01)
+
+
+### Bug Fixes
+
+* remove next tag on npm. now latest is default tag ([3af360f](https://github.com/elasticlive/web-sdk/commit/3af360f))
+
 ## [3.3.4](https://github.com/elasticlive/web-sdk/compare/v3.3.3...v3.3.4) (2019-04-01)
 
 
