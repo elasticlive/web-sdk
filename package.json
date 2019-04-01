@@ -25,7 +25,8 @@
     "build:production": "npm run clean:dist && rollup -c rollup.config.prod.js",
     "build:docs": "npm run clean:docs && jsdoc -c .jsdoc.json",
     "build": "npm run build:production && npm run build:docs",
-    "semantic-release": "semantic-release --dry-run"
+    "semantic-release": "semantic-release --dry-run",
+    "prepublishOnly": "npm run build"
   },
   "keywords": [
     "WebRTC",
