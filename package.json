@@ -96,9 +96,6 @@
     "url": "https://github.com/elasticlive/web-sdk.git"
   },
   "publishConfig": {
-    "access": "public",
-    "publishConfig": {
-      "tag": "next"
-    }
+    "access": "public"
   }
 }
