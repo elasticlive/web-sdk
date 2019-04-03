@@ -21,7 +21,10 @@ export default async function Auth(ctx) {
       sdkVersion: ctx.version,
       purpose: ctx.purpose,
       country:
-        ctx.config.sdk && ctx.config.sdk.country ? ctx.config.sdk.country : "KR"
+        ctx.config.sdk && ctx.config.sdk.country
+          ? ctx.config.sdk.country
+          : "KR",
+      mode: ctx.config.sdk.mode
     }
   };
   if (ctx.config.sdk.coachId) messageBody.env.coachId = ctx.config.sdk.coachId;
