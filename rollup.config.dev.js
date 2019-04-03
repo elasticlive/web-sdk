@@ -12,13 +12,13 @@ export default {
       format: "umd",
       name: "ELive",
       sourcemap: true,
-      intro: `const __VERSION__ = "${meta.version}"; const __ENV__="dev";`
+      intro: `const __VERSION__ = "${meta.version}-dev"; const __ENV__="dev";`
     },
     {
       file: "dist/ELive.mjs",
       format: "es",
       sourcemap: true,
-      intro: `const __VERSION__ = "${meta.version}"; const __ENV__="dev";`
+      intro: `const __VERSION__ = "${meta.version}-dev"; const __ENV__="dev";`
     }
   ],
   plugins: [

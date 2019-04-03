@@ -1,11 +1,11 @@
-// https://elasticlive.io v3.3.5 Copyright 2019 RemoteMonster
+// https://elasticlive.io v3.3.6 Copyright 2019 RemoteMonster
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
 	typeof define === 'function' && define.amd ? define(factory) :
 	(global = global || self, global.ELive = factory());
 }(this, function () { 'use strict';
 
-	const __VERSION__ = "3.3.5"; const __ENV__="prod"
+	const __VERSION__ = "3.3.6"; const __ENV__="prod"
 
 	var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 

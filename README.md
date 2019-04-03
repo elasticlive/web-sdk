@@ -1,4 +1,5 @@
-[![npm](https://img.shields.io/npm/v/@elasticlive/sdk.svg)](https://www.npmjs.com/package/@elasticlive/sdk)
+[![npm (latest)](https://img.shields.io/npm/v/@elasticlive/sdk/latest.svg)](https://www.npmjs.com/package/@elasticlive/sdk)
+[![npm (next)](https://img.shields.io/npm/v/@elasticlive/sdk/next.svg)](https://www.npmjs.com/package/@elasticlive/sdk)
 [![CircleCI](https://circleci.com/gh/elasticlive/web-sdk.svg?style=svg)](https://circleci.com/gh/elasticlive/web-sdk)
 
 # elasticlive web SDK
@@ -68,6 +69,14 @@ If you develop with mock server, you have to set config to `config.sdk.mode="dev
 
 ```bash
 npm run build
+```
+
+### Stable version tagging for production
+
+Default npm tag is next for beta deploy. After npm deployed, you should set dist-tag to latest.
+
+```bash
+npm dist-tag add @elasticlive/sdk@xx.xx.xx latest
 ```
 
 ### Conturibute

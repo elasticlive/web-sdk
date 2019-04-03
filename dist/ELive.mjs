@@ -1,5 +1,5 @@
-// https://elasticlive.io v3.3.5 Copyright 2019 RemoteMonster
-const __ELIVE_VERSION__ = "3.3.5;"
+// https://elasticlive.io v3.3.6 Copyright 2019 RemoteMonster
+const __ELIVE_VERSION__ = "3.3.6;"
 
 var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
