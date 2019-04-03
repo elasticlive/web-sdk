@@ -1,6 +1,6 @@
 {
   "name": "@elasticlive/sdk",
-  "version": "3.3.6",
+  "version": "3.3.7",
   "description": "elasticlive",
   "main": "dist/ELive.min.js",
   "module": "dist/ELive.min.mjs",
@@ -97,6 +97,8 @@
   },
   "publishConfig": {
     "access": "public",
-    "publishConfig": {"tag": "next"}
+    "publishConfig": {
+      "tag": "next"
+    }
   }
 }
