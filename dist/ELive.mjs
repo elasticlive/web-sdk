@@ -1,5 +1,5 @@
-// https://elasticlive.io v3.3.6 Copyright 2019 RemoteMonster
-const __ELIVE_VERSION__ = "3.3.6;"
+// https://elasticlive.io v3.3.8 Copyright 2019 RemoteMonster
+const __ELIVE_VERSION__ = "3.3.8;"
 
 var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -2045,7 +2045,11 @@ const util = (() => {
       !ctx.config.credential.key
     ) {
       // l.e('no credential data')
-      throw new ELiveError({ code: "1200", text: "no credential data" });
+      // throw new EliveError({ code: "1200", text: "no credential data" });
+      ctx.config.credential = {
+        serviceId: "SERVICEID1",
+        key: "1234567890"
+      };
     }
   }
 
@@ -2695,7 +2699,10 @@ async function Auth(ctx) {
       sdkVersion: ctx.version,
       purpose: ctx.purpose,
       country:
-        ctx.config.sdk && ctx.config.sdk.country ? ctx.config.sdk.country : "KR"
+        ctx.config.sdk && ctx.config.sdk.country
+          ? ctx.config.sdk.country
+          : "KR",
+      mode: ctx.config.sdk.mode
     }
   };
   if (ctx.config.sdk.coachId) messageBody.env.coachId = ctx.config.sdk.coachId;

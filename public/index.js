@@ -27,6 +27,7 @@ live.on("onDisplayUserMedia", stream => {
 });
 live.on("init", () => {
   console.log("init is called to the app");
+  document.querySelector("#status").textContent = "init:ok"
 });
 live.on("onMessage", msg => {
   console.log(`msg is ${msg}`);
@@ -88,3 +89,7 @@ document.querySelector("#listen").addEventListener("click", evt => {
   live.watch("demoCast");
   evt.preventDefault();
 });
+document.querySelector("#dev").addEventListener("click", evt => {
+  config.sdk.dev = "dev"
+  evt.preventDefault();
+})
