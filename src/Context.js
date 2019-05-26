@@ -17,6 +17,7 @@ export default class Context {
     this.remoteMedia;
     this.remoteMedia2;
     this.localStream; // = new MediaStream();
+    this.screenStream;
     this.remoteStream; // = new MediaStream();
     this.transceivers = null;
     this.devices = {

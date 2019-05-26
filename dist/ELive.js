@@ -1,11 +1,12 @@
-// https://elasticlive.io v3.3.8 Copyright 2019 RemoteMonster
+
+(function(l, i, v, e) { v = l.createElement(i); v.async = 1; v.src = '//' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; e = l.getElementsByTagName(i)[0]; e.parentNode.insertBefore(v, e)})(document, 'script');
 (function (global, factory) {
 	typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory() :
 	typeof define === 'function' && define.amd ? define(factory) :
 	(global = global || self, global.ELive = factory());
 }(this, function () { 'use strict';
 
-	const __VERSION__ = "3.3.8"; const __ENV__="prod"
+	const __VERSION__ = "3.3.8-dev"; const __ENV__="dev";
 
 	var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -1757,6 +1758,7 @@
 	    this.remoteMedia;
 	    this.remoteMedia2;
 	    this.localStream; // = new MediaStream();
+	    this.screenStream; 
 	    this.remoteStream; // = new MediaStream();
 	    this.transceivers = null;
 	    this.devices = {
@@ -2856,13 +2858,16 @@
 	  }
 
 	  async captureScreen() {
-	    this.ctx.localStream = await navigator.mediaDevices.getDisplayMedia({
-	      video: true
+	    this.ctx.screenStream = await navigator.mediaDevices.getDisplayMedia({
+	      video: {width:1280, height: 720}, audio: true
 	    });
+	    // replace remote video track with screenStream of video track
 	    this.ctx.transceivers[1].sender.replaceTrack(
-	      this.ctx.localStream.getTracks()[0]
+	      this.ctx.screenStream.getTracks()[1]
 	    );
-	    this.ctx.localStream.addTrack(this.ctx.transceivers[0].sender.track);
+	    // replace remote audio track with merged audio.
+	    this.ctx.transceivers[0].sender.replaceTrack(this.mergeAudioStreams(this.ctx.screenStream, this.ctx.localStream));
+	    // this.ctx.localStream.addTrack(this.ctx.transceivers[0].sender.track); // why add owned voice?
 	    this.ctx.localVideo.srcObject = this.ctx.localStream;
 	  }
 
@@ -3005,6 +3010,24 @@
 	    if (!this.ctx.transceivers) return;
 	    this.ctx.transceivers[1].sender.track.enabled = !isMute;
 	    this.ctx.transceivers[0].sender.track.enabled = !isMute;
+	  }
+	  mergeAudioStreams(stream1, stream2) {
+	    const context = new AudioContext();
+	    const source1 = context.createMediaStreamSource(stream1);
+	    const source2 = context.createMediaStreamSource(stream2);
+	    const destination = context.createMediaStreamDestination();
+	    
+	    const gain1 = context.createGain();
+	    const gain2 = context.createGain();
+	      
+	    gain1.gain.value = 0.7;
+	    gain2.gain.value = 0.7;
+	     
+	    source1.connect(gain1).connect(destination);
+	    // Connect source2
+	    source2.connect(gain2).connect(destination);
+	      
+	    return destination.stream.getAudioTracks()[0];
 	  }
 
 	  async showLocalVideo(deviceId) {
@@ -3448,3 +3471,4 @@
 	return ELive;
 
 }));
+//# sourceMappingURL=ELive.js.map

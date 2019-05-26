@@ -5,7 +5,7 @@ const config = {
   },
   sdk: {
     logLevel: "VERBOSE",
-    coachId: "KR-ELIVE-COACH-1"
+    country: "KR"
     // mode: "dev"
     // audioType: 'music'
   },
@@ -27,7 +27,7 @@ live.on("onDisplayUserMedia", stream => {
 });
 live.on("init", () => {
   console.log("init is called to the app");
-  document.querySelector("#status").textContent = "init:ok"
+  document.querySelector("#status").textContent = "init:ok";
 });
 live.on("onMessage", msg => {
   console.log(`msg is ${msg}`);
@@ -90,6 +90,6 @@ document.querySelector("#listen").addEventListener("click", evt => {
   evt.preventDefault();
 });
 document.querySelector("#dev").addEventListener("click", evt => {
-  config.sdk.dev = "dev"
+  config.sdk.dev = "dev";
   evt.preventDefault();
-})
+});

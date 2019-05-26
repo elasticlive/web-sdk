@@ -7,13 +7,19 @@ export default class Device {
   }
 
   async captureScreen() {
-    this.ctx.localStream = await navigator.mediaDevices.getDisplayMedia({
-      video: true
+    this.ctx.screenStream = await navigator.mediaDevices.getDisplayMedia({
+      video: { width: 1280, height: 720 },
+      audio: true
     });
+    // replace remote video track with screenStream of video track
     this.ctx.transceivers[1].sender.replaceTrack(
-      this.ctx.localStream.getTracks()[0]
+      this.ctx.screenStream.getTracks()[1]
     );
-    this.ctx.localStream.addTrack(this.ctx.transceivers[0].sender.track);
+    // replace remote audio track with merged audio.
+    this.ctx.transceivers[0].sender.replaceTrack(
+      this.mergeAudioStreams(this.ctx.screenStream, this.ctx.localStream)
+    );
+    // this.ctx.localStream.addTrack(this.ctx.transceivers[0].sender.track); // why add owned voice?
     this.ctx.localVideo.srcObject = this.ctx.localStream;
   }
 
@@ -156,6 +162,24 @@ export default class Device {
     if (!this.ctx.transceivers) return;
     this.ctx.transceivers[1].sender.track.enabled = !isMute;
     this.ctx.transceivers[0].sender.track.enabled = !isMute;
+  }
+  mergeAudioStreams(stream1, stream2) {
+    const context = new AudioContext();
+    const source1 = context.createMediaStreamSource(stream1);
+    const source2 = context.createMediaStreamSource(stream2);
+    const destination = context.createMediaStreamDestination();
+
+    const gain1 = context.createGain();
+    const gain2 = context.createGain();
+
+    gain1.gain.value = 0.7;
+    gain2.gain.value = 0.7;
+
+    source1.connect(gain1).connect(destination);
+    // Connect source2
+    source2.connect(gain2).connect(destination);
+
+    return destination.stream.getAudioTracks()[0];
   }
 
   async showLocalVideo(deviceId) {
