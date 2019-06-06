@@ -12,6 +12,7 @@ import l from "./Logger";
 import util from "./Util";
 import Device from "./Device";
 import Health from "./Health";
+import Stat from "./Stat";
 
 /**
  * <p>Main class for ElasticLive. It can help to make P2P call and broadcast room. It can also join the broadcast room and adjust constraints.</p>
@@ -71,6 +72,7 @@ class ELive extends EventEmitter {
     this.ctx = new Context();
     this.ctx.version = this.version;
     this.ctx.elive = this;
+    this.ctx.currentStat = new Stat(this.ctx);
     this.ctx.config = deepmerge(Config, config);
     l.init(this.ctx);
     this.ctx.callEvent = this.onEvent;

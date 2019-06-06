@@ -19,6 +19,7 @@ export default class Context {
     this.localStream; // = new MediaStream();
     this.screenStream;
     this.remoteStream; // = new MediaStream();
+    this.currentStat;
     this.transceivers = null;
     this.devices = {
       currentVideoInput: -1,

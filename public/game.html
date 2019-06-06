@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <title>elasticlive simple game livestreaming example</title>
+  </head>
+
+  <body>
+    <h1>Test page for game streaming</h1>
+    <div id="videos">
+      <div id="localVideoDiv" style="position: relative;">
+        <video id="localVideo" muted autoplay controls playsinline></video>
+        <div
+          style="width: 100px; height: 30px; color: white; z-index: 1; position: absolute; top: 0px; left: 0px; background: green;"
+        >
+          local
+        </div>
+      </div>
+      <div id="remoteVideoDiv" style="position: relative;">
+        <video
+          id="remoteVideo"
+          autoplay
+          controls
+          playsinline
+          webkit-playsinline
+        ></video>
+        <div
+          id="remoteCamDiv"
+          style="width: 150px; height: 120px;z-index: 1; position: absolute; top: 0px; left: 0px; background: green;"
+        >
+          <video
+            id="remoteCam"
+            autoplay
+            playsinline
+            webkit-playsinline
+            style="width: 100%; height:100%;"
+          ></video>
+        </div>
+      </div>
+    </div>
+    <br />
+    <div id="messagebox">
+      Just click 'cast' button to create streaming room and then click
+      'ShareGameScreen' button to share game screen.
+    </div>
+    <div id="buttons">
+      <input id="roomid" type="text" placeholder="Input your boradcast ID" />
+      <button id="cast">Cast</button><br />
+      <!-- <button id="switchCamera" disabled>SwitchCam</button> -->
+      <button id="captureScreen" disabled>ShareGameScreen</button><br />
+      <button id="close" disabled="true">Close</button>
+    </div>
+    <img
+      src="https://softstribe.com/wp-content/uploads/2017/09/Omlet-Arcade-1.18.2-APK-290x290.png"
+    />
+  </body>
+  <script src="https://cdn.jsdelivr.net/npm/webrtc-adapter/out/adapter.js"></script>
+  <script src="./ELive.js"></script>
+  <script src="game.js"></script>
+</html>

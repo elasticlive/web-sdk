@@ -154,6 +154,7 @@ function SigMsgHandler(ctx) {
       ctx.peerConnection.oniceconnectionstatechange = handleViewerIceConnectionEvent;
       ctx.peerConnection.to = ctx.channel.members[0].id;
       ctx.peerConnection.onnegotiationneeded = handleRenegoEvent;
+      ctx.health.start();
     },
     onSearch(msg) {
       l.d(`onSearch ${JSON.stringify(msg.body)}`);

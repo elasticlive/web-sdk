@@ -6,7 +6,7 @@
 	(global = global || self, global.ELive = factory());
 }(this, function () { 'use strict';
 
-	const __VERSION__ = "3.3.8-dev"; const __ENV__="dev";
+	const __VERSION__ = "3.4.0-dev"; const __ENV__="dev";
 
 	var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -1758,8 +1758,9 @@
 	    this.remoteMedia;
 	    this.remoteMedia2;
 	    this.localStream; // = new MediaStream();
-	    this.screenStream; 
+	    this.screenStream;
 	    this.remoteStream; // = new MediaStream();
+	    this.currentStat;
 	    this.transceivers = null;
 	    this.devices = {
 	      currentVideoInput: -1,
@@ -2301,6 +2302,7 @@
 	      ctx.peerConnection.oniceconnectionstatechange = handleViewerIceConnectionEvent;
 	      ctx.peerConnection.to = ctx.channel.members[0].id;
 	      ctx.peerConnection.onnegotiationneeded = handleRenegoEvent;
+	      ctx.health.start();
 	    },
 	    onSearch(msg) {
 	      logger.d(`onSearch ${JSON.stringify(msg.body)}`);
@@ -2859,14 +2861,18 @@
 
 	  async captureScreen() {
 	    this.ctx.screenStream = await navigator.mediaDevices.getDisplayMedia({
-	      video: {width:1280, height: 720}, audio: true
+	      video: { width: 1280, height: 720 },
+	      audio: true
 	    });
 	    // replace remote video track with screenStream of video track
 	    this.ctx.transceivers[1].sender.replaceTrack(
 	      this.ctx.screenStream.getTracks()[1]
 	    );
 	    // replace remote audio track with merged audio.
-	    this.ctx.transceivers[0].sender.replaceTrack(this.mergeAudioStreams(this.ctx.screenStream, this.ctx.localStream));
+	    this.ctx.transceivers[0].sender.replaceTrack(
+	      //this.mergeAudioStreams(this.ctx.screenStream, this.ctx.localStream)
+	      this.ctx.screenStream.getTracks()[0]
+	    );
 	    // this.ctx.localStream.addTrack(this.ctx.transceivers[0].sender.track); // why add owned voice?
 	    this.ctx.localVideo.srcObject = this.ctx.localStream;
 	  }
@@ -3016,17 +3022,17 @@
 	    const source1 = context.createMediaStreamSource(stream1);
 	    const source2 = context.createMediaStreamSource(stream2);
 	    const destination = context.createMediaStreamDestination();
-	    
+
 	    const gain1 = context.createGain();
 	    const gain2 = context.createGain();
-	      
+
 	    gain1.gain.value = 0.7;
 	    gain2.gain.value = 0.7;
-	     
+
 	    source1.connect(gain1).connect(destination);
 	    // Connect source2
 	    source2.connect(gain2).connect(destination);
-	      
+
 	    return destination.stream.getAudioTracks()[0];
 	  }
 
@@ -3123,6 +3129,26 @@
 	  }
 	}
 
+	class Stat {
+	  constructor(ctx) {
+	    this.localVideoWidth= 0;
+	    this.localVideoHeight= 0;
+	    this.remoteVideoWidth= 0;
+	    this.remoteVideoHeight= 0;
+	    this.localFrameRate= 0;
+	    this.remoteFrameRate= 0;
+	    this.availableSendBandwidth= 0;
+	    this.availableReceiveBandwidth= 0;
+	    this.rtt= 0;
+	    this.localSentFrames=0;
+	    this.remoteReceivedFrames = 0;
+	    this.sentBPS=0;
+	    this.receivedBPS=0;
+	    this.sentBytes = 0;
+	    this.receivedBytes = 0;
+	  }
+	}
+
 	class Health {
 	  constructor(ctx) {
 	    this.interval = 5000;
@@ -3139,6 +3165,46 @@
 	      this.context.signaler.send(
 	        this.context.signaler.createMessage({ command: "ping", body: {} })
 	      );
+	      const oldStat = this.context.currentStat;
+	      const newStat = new Stat(this.context);
+	      this.context.currentStat = newStat;
+	      // let statsOutput = "";
+	      this.context.peerConnection.getStats(null).then(stats => {
+	        stats.forEach(report => {
+	          switch(report.type){
+	            case "track":
+	              if (report.kind !== "video")break;
+	              if (report["remoteSource"]){
+	                if (report["frameWidth"]) newStat.remoteVideoWidth = report["frameWidth"];
+	                if (report["frameHeight"]) newStat.remoteVideoHeight = report["frameHeight"];
+	                newStat.remoteReceivedFrames = report["framesReceived"];
+	                if (report["framesReceived"])
+	                  newStat.remoteFrameRate = (report["framesReceived"] - oldStat.remoteReceivedFrames)/(this.interval/1000);
+	              }else {
+	                if (report["frameWidth"]) newStat.localVideoWidth = report["frameWidth"];
+	                if (report["frameHeight"]) newStat.localVideoHeight = report["frameHeight"];
+	                newStat.localSentFrames = report["framesSent"];
+	                if (report["framesSent"])
+	                  newStat.localFrameRate = (report["framesSent"] - oldStat.localSentFrames)/(this.interval/1000);
+	              }
+	            case "transport":
+	              newStat.sentBytes = report["bytesSent"];
+	              newStat.receivedBytes = report["bytesReceived"];
+	              newStat.sentBPS = (newStat.sentBytes - oldStat.sentBytes)/(this.interval/1000);
+	              newStat.receivedBPS = (newStat.receivedBytes - oldStat.receivedBytes)/(this.interval/1000); 
+	          }
+	          // statsOutput += `<h2>Report: ${report.type}</h2>\n<strong>ID:</strong> ${report.id}<br>\n` +
+	          //               `<strong>Timestamp:</strong> ${report.timestamp}<br>\n`;
+	          // Object.keys(report).forEach(statName => {
+	          //   if (statName !== "id" && statName !== "timestamp" && statName !== "type") {
+	          //     statsOutput += `<strong>${statName}:</strong> ${report[statName]}<br>\n`;
+	          //   }
+	          // });
+	        });
+	        // console.log(statsOutput)
+	      });
+	      console.log(newStat);
+	      
 	    }, this.interval);
 	  }
 
@@ -3208,6 +3274,7 @@
 	    this.ctx = new Context();
 	    this.ctx.version = this.version;
 	    this.ctx.elive = this;
+	    this.ctx.currentStat = new Stat(this.ctx);
 	    this.ctx.config = umd(config, config$1);
 	    logger.init(this.ctx);
 	    this.ctx.callEvent = this.onEvent;

@@ -17,7 +17,8 @@ export default class Device {
     );
     // replace remote audio track with merged audio.
     this.ctx.transceivers[0].sender.replaceTrack(
-      this.mergeAudioStreams(this.ctx.screenStream, this.ctx.localStream)
+      //this.mergeAudioStreams(this.ctx.screenStream, this.ctx.localStream)
+      this.ctx.screenStream.getTracks()[0]
     );
     // this.ctx.localStream.addTrack(this.ctx.transceivers[0].sender.track); // why add owned voice?
     this.ctx.localVideo.srcObject = this.ctx.localStream;
