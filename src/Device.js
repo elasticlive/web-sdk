@@ -8,8 +8,11 @@ export default class Device {
 
   async captureScreen() {
     this.ctx.screenStream = await navigator.mediaDevices.getDisplayMedia({
-      video: { width: 1280, height: 720 },
-      audio: true
+      video: {
+        width: ctx.config.media.screen.video.width,
+        height: ctx.config.media.screen.video.height
+      },
+      audio: ctx.config.media.screen.audio
     });
     // replace remote video track with screenStream of video track
     this.ctx.transceivers[1].sender.replaceTrack(

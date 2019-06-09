@@ -27,7 +27,11 @@
  *  // Please refer to https://developer.mozilla.org/en/docs/Web/API/MediaStreamConstraints
  *  media: {
  *    video: true,
- *    audio: true
+ *    audio: true,
+ *    screen: {
+ *      video: {width: 1280, height: 720},
+ *      audio: true
+ *    }
  *  },
  *  // 'sdk' is an option for developers and some special features.
  *  sdk: {
@@ -66,7 +70,8 @@ var config = (() => {
     media: {
       // correspond to getusermedia option format
       video: { frameRate: { min: 20, max: 30 } },
-      audio: { channelCount: 2 }
+      audio: { channelCount: 2 },
+      screen: { video: { width: 1280, height: 720 }, audio: true }
     },
     sdk: {
       url: {
