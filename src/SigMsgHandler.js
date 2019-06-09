@@ -23,6 +23,7 @@ function SigMsgHandler(ctx) {
       ctx.messaging.listening();
       ctx.dataConnection.onicecandidate = handleDcIceCandidate;
       ctx.peerConnection.oniceconnectionstatechange = handleIceConnectionEvent;
+      ctx.health.start();
     },
     onCallee(msg) {
       l.i(`start onCallee with chid:${msg.channel.id}`);
@@ -73,6 +74,7 @@ function SigMsgHandler(ctx) {
             ctx.signaler.send(msg);
           });
         });
+      ctx.health.start();
     },
     onCast(msg) {
       if (msg.status > 3099) {
@@ -363,7 +365,7 @@ function SigMsgHandler(ctx) {
         ctx.state = "CLOSE";
         ctx.endTime = new Date().getTime();
         l.t(ctx, util.makeTransactionLog(ctx));
-        //ctx.elive.close()
+        ctx.elive.close();
       }
       ctx.callEvent({ name: "onClose", param: {} });
     }

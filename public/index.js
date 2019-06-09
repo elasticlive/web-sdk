@@ -41,6 +41,9 @@ live.on("onComplete", msg => {
   document.querySelector("#close").disabled = false;
   document.querySelector("#captureScreen").disabled = false;
 });
+live.on("onStat", msg => {
+  console.log(msg);
+});
 document.querySelector("#switchCamera").addEventListener("click", evt => {
   // If you have more than one camera, you can run the switchCamera () method
   live.switchCamera();

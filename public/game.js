@@ -41,11 +41,13 @@ const configForCam = {
 const roomId = window.location.href.split("?").pop();
 
 const msgbox = document.querySelector("#messagebox");
+const frameInfo = document.querySelector("#frameInfoDiv");
 const live = new ELive(config);
 const liveCam = new ELive(configForCam);
 
 let isCaptureScreen = false;
 let isCast = false;
+let health;
 
 if (roomId.startsWith("room_")) {
   console.log("try watch " + roomId);
@@ -69,8 +71,31 @@ live.on("onComplete", msg => {
   document.querySelector("#close").disabled = false;
   document.querySelector("#captureScreen").disabled = false;
 });
+live.on("onStat", msg => {
+  health = msg;
+  let info = "";
+  if (isCast) {
+    info += "frameRate: " + health.localFrameRate + "<br>";
+    info += "Width: " + health.localVideoWidth + "<br>";
+    info += "Height: " + health.localVideoHeight + "<br>";
+    info += `BPS: ${health.sentBPS}<br>`;
+  } else {
+    info += `frameRate: ${health.remoteFrameRate}<br>Width: ${
+      health.remoteVideoWidth
+    }<br>`;
+    info += `Height: ${health.remoteVideoHeight}<br>`;
+    info += `BPS: ${health.receivedBPS}<br>`;
+  }
+  frameInfo.innerHTML = info;
+  console.log(health);
+  console.log(live.ctx.currentStat);
+  console.log(health.sentBPS + " ");
+});
 liveCam.on("onComplete", msg => {
   if (isCast) return;
+});
+liveCam.on("onStat", msg => {
+  // console.log(msg);
 });
 
 document.querySelector("#captureScreen").addEventListener("click", evt => {

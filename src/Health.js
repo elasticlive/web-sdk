@@ -14,9 +14,10 @@ class Health {
   start() {
     this._clear();
     this.statsReportTimer = window.setInterval(() => {
-      this.context.signaler.send(
-        this.context.signaler.createMessage({ command: "ping", body: {} })
-      );
+      if (this.context.channel.type !== "P2P")
+        this.context.signaler.send(
+          this.context.signaler.createMessage({ command: "ping", body: {} })
+        );
       const oldStat = this.context.currentStat;
       const newStat = new Stat(this.context);
       this.context.currentStat = newStat;
@@ -67,7 +68,8 @@ class Health {
         });
         // console.log(statsOutput)
       });
-      console.log(newStat);
+      // console.log(newStat);
+      this.context.callEvent({ name: "onStat", param: newStat });
     }, this.interval);
   }
 
