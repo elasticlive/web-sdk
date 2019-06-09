@@ -1,6 +1,6 @@
 
 (function(l, i, v, e) { v = l.createElement(i); v.async = 1; v.src = '//' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; e = l.getElementsByTagName(i)[0]; e.parentNode.insertBefore(v, e)})(document, 'script');
-const __VERSION__ = "3.5.0-dev"; const __ENV__="dev";
+const __VERSION__ = "3.5.1-dev"; const __ENV__="dev";
 
 var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -2165,6 +2165,7 @@ function SigMsgHandler(ctx) {
       ctx.messaging.listening();
       ctx.dataConnection.onicecandidate = handleDcIceCandidate;
       ctx.peerConnection.oniceconnectionstatechange = handleIceConnectionEvent;
+      ctx.health.start();
     },
     onCallee(msg) {
       logger.i(`start onCallee with chid:${msg.channel.id}`);
@@ -2215,6 +2216,7 @@ function SigMsgHandler(ctx) {
             ctx.signaler.send(msg);
           });
         });
+      ctx.health.start();
     },
     onCast(msg) {
       if (msg.status > 3099) {
@@ -2505,7 +2507,7 @@ function SigMsgHandler(ctx) {
         ctx.state = "CLOSE";
         ctx.endTime = new Date().getTime();
         logger.t(ctx, util.makeTransactionLog(ctx));
-        //ctx.elive.close()
+        ctx.elive.close();
       }
       ctx.callEvent({ name: "onClose", param: {} });
     }
@@ -3165,9 +3167,10 @@ class Health {
   start() {
     this._clear();
     this.statsReportTimer = window.setInterval(() => {
-      this.context.signaler.send(
-        this.context.signaler.createMessage({ command: "ping", body: {} })
-      );
+      if (this.context.channel.type !== "P2P")
+        this.context.signaler.send(
+          this.context.signaler.createMessage({ command: "ping", body: {} })
+        );
       const oldStat = this.context.currentStat;
       const newStat = new Stat(this.context);
       this.context.currentStat = newStat;
@@ -3217,8 +3220,10 @@ class Health {
           // });
         });
         // console.log(statsOutput)
+        this.context.callEvent({ name: "onStat", param: newStat });
       });
-      console.log(newStat);
+      // console.log(newStat);
+      
     }, this.interval);
   }
 

@@ -6,7 +6,7 @@
 	(global = global || self, global.ELive = factory());
 }(this, function () { 'use strict';
 
-	const __VERSION__ = "3.5.0-dev"; const __ENV__="dev";
+	const __VERSION__ = "3.5.1-dev"; const __ENV__="dev";
 
 	var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -2171,6 +2171,7 @@
 	      ctx.messaging.listening();
 	      ctx.dataConnection.onicecandidate = handleDcIceCandidate;
 	      ctx.peerConnection.oniceconnectionstatechange = handleIceConnectionEvent;
+	      ctx.health.start();
 	    },
 	    onCallee(msg) {
 	      logger.i(`start onCallee with chid:${msg.channel.id}`);
@@ -2221,6 +2222,7 @@
 	            ctx.signaler.send(msg);
 	          });
 	        });
+	      ctx.health.start();
 	    },
 	    onCast(msg) {
 	      if (msg.status > 3099) {
@@ -2511,7 +2513,7 @@
 	        ctx.state = "CLOSE";
 	        ctx.endTime = new Date().getTime();
 	        logger.t(ctx, util.makeTransactionLog(ctx));
-	        //ctx.elive.close()
+	        ctx.elive.close();
 	      }
 	      ctx.callEvent({ name: "onClose", param: {} });
 	    }
@@ -3171,9 +3173,10 @@
 	  start() {
 	    this._clear();
 	    this.statsReportTimer = window.setInterval(() => {
-	      this.context.signaler.send(
-	        this.context.signaler.createMessage({ command: "ping", body: {} })
-	      );
+	      if (this.context.channel.type !== "P2P")
+	        this.context.signaler.send(
+	          this.context.signaler.createMessage({ command: "ping", body: {} })
+	        );
 	      const oldStat = this.context.currentStat;
 	      const newStat = new Stat(this.context);
 	      this.context.currentStat = newStat;
@@ -3223,8 +3226,10 @@
 	          // });
 	        });
 	        // console.log(statsOutput)
+	        this.context.callEvent({ name: "onStat", param: newStat });
 	      });
-	      console.log(newStat);
+	      // console.log(newStat);
+	      
 	    }, this.interval);
 	  }
 

@@ -67,9 +67,9 @@ class Health {
           // });
         });
         // console.log(statsOutput)
+        this.context.callEvent({ name: "onStat", param: newStat });
       });
       // console.log(newStat);
-      this.context.callEvent({ name: "onStat", param: newStat });
     }, this.interval);
   }
 
