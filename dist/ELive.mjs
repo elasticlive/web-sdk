@@ -1,5 +1,6 @@
-// https://elasticlive.io v3.4.0 Copyright 2019 RemoteMonster
-const __ELIVE_VERSION__ = "3.4.0;"
+
+(function(l, i, v, e) { v = l.createElement(i); v.async = 1; v.src = '//' + (location.host || 'localhost').split(':')[0] + ':35729/livereload.js?snipver=1'; e = l.getElementsByTagName(i)[0]; e.parentNode.insertBefore(v, e)})(document, 'script');
+const __VERSION__ = "3.5.0-dev"; const __ENV__="dev";
 
 var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -2788,7 +2789,11 @@ async function Auth(ctx) {
  *  // Please refer to https://developer.mozilla.org/en/docs/Web/API/MediaStreamConstraints
  *  media: {
  *    video: true,
- *    audio: true
+ *    audio: true,
+ *    screen: {
+ *      video: {width: 1280, height: 720},
+ *      audio: true
+ *    }
  *  },
  *  // 'sdk' is an option for developers and some special features.
  *  sdk: {
@@ -2827,7 +2832,8 @@ var config = (() => {
     media: {
       // correspond to getusermedia option format
       video: { frameRate: { min: 20, max: 30 } },
-      audio: { channelCount: 2 }
+      audio: { channelCount: 2 },
+      screen: { video: { width: 1280, height: 720 }, audio: true }
     },
     sdk: {
       url: {
@@ -2854,17 +2860,21 @@ class Device {
 
   async captureScreen() {
     this.ctx.screenStream = await navigator.mediaDevices.getDisplayMedia({
-      video: { width: 1280, height: 720 },
-      audio: true
+      video: {
+        width: this.ctx.config.media.screen.video.width,
+        height: this.ctx.config.media.screen.video.height
+      },
+      audio: this.ctx.config.media.screen.audio
     });
     // replace remote video track with screenStream of video track
     this.ctx.transceivers[1].sender.replaceTrack(
       this.ctx.screenStream.getTracks()[1]
     );
+    // this.ctx.peerConnection.addTrack(this.ctx.screenStream.getTracks()[1]);
     // replace remote audio track with merged audio.
     this.ctx.transceivers[0].sender.replaceTrack(
-      //this.mergeAudioStreams(this.ctx.screenStream, this.ctx.localStream)
-      this.ctx.screenStream.getTracks()[0]
+      this.mergeAudioStreams(this.ctx.screenStream, this.ctx.localStream)
+      //this.ctx.screenStream.getTracks()[0]
     );
     // this.ctx.localStream.addTrack(this.ctx.transceivers[0].sender.track); // why add owned voice?
     this.ctx.localVideo.srcObject = this.ctx.localStream;
@@ -3540,3 +3550,4 @@ try {
 }
 
 export default ELive;
+//# sourceMappingURL=ELive.mjs.map

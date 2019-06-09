@@ -28,6 +28,14 @@ const configForCam = {
   view: {
     local: "localVideo",
     remote: "remoteCam"
+  },
+  media: {
+    video: {
+      width: 320,
+      height: 240,
+      bitrate: 400
+    },
+    audio: false
   }
 };
 const roomId = window.location.href.split("?").pop();
@@ -86,7 +94,6 @@ document.querySelector("#cast").addEventListener("click", evt => {
   document.querySelector("#remoteVideoDiv").style.visibility = "hidden";
   document.querySelector("#remoteVideo").style.display = "none";
   document.querySelector("#remoteVideo").style.visibility = "hidden";
-  //display:none 과 visibility:hidden
   evt.preventDefault();
 });
 document.querySelector("#close").addEventListener("click", evt => {

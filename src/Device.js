@@ -9,19 +9,20 @@ export default class Device {
   async captureScreen() {
     this.ctx.screenStream = await navigator.mediaDevices.getDisplayMedia({
       video: {
-        width: ctx.config.media.screen.video.width,
-        height: ctx.config.media.screen.video.height
+        width: this.ctx.config.media.screen.video.width,
+        height: this.ctx.config.media.screen.video.height
       },
-      audio: ctx.config.media.screen.audio
+      audio: this.ctx.config.media.screen.audio
     });
     // replace remote video track with screenStream of video track
     this.ctx.transceivers[1].sender.replaceTrack(
       this.ctx.screenStream.getTracks()[1]
     );
+    // this.ctx.peerConnection.addTrack(this.ctx.screenStream.getTracks()[1]);
     // replace remote audio track with merged audio.
     this.ctx.transceivers[0].sender.replaceTrack(
-      //this.mergeAudioStreams(this.ctx.screenStream, this.ctx.localStream)
-      this.ctx.screenStream.getTracks()[0]
+      this.mergeAudioStreams(this.ctx.screenStream, this.ctx.localStream)
+      //this.ctx.screenStream.getTracks()[0]
     );
     // this.ctx.localStream.addTrack(this.ctx.transceivers[0].sender.track); // why add owned voice?
     this.ctx.localVideo.srcObject = this.ctx.localStream;

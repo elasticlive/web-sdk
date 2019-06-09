@@ -6,7 +6,7 @@
 	(global = global || self, global.ELive = factory());
 }(this, function () { 'use strict';
 
-	const __VERSION__ = "3.4.0-dev"; const __ENV__="dev";
+	const __VERSION__ = "3.5.0-dev"; const __ENV__="dev";
 
 	var commonjsGlobal = typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -2795,7 +2795,11 @@
 	 *  // Please refer to https://developer.mozilla.org/en/docs/Web/API/MediaStreamConstraints
 	 *  media: {
 	 *    video: true,
-	 *    audio: true
+	 *    audio: true,
+	 *    screen: {
+	 *      video: {width: 1280, height: 720},
+	 *      audio: true
+	 *    }
 	 *  },
 	 *  // 'sdk' is an option for developers and some special features.
 	 *  sdk: {
@@ -2834,7 +2838,8 @@
 	    media: {
 	      // correspond to getusermedia option format
 	      video: { frameRate: { min: 20, max: 30 } },
-	      audio: { channelCount: 2 }
+	      audio: { channelCount: 2 },
+	      screen: { video: { width: 1280, height: 720 }, audio: true }
 	    },
 	    sdk: {
 	      url: {
@@ -2861,17 +2866,21 @@
 
 	  async captureScreen() {
 	    this.ctx.screenStream = await navigator.mediaDevices.getDisplayMedia({
-	      video: { width: 1280, height: 720 },
-	      audio: true
+	      video: {
+	        width: this.ctx.config.media.screen.video.width,
+	        height: this.ctx.config.media.screen.video.height
+	      },
+	      audio: this.ctx.config.media.screen.audio
 	    });
 	    // replace remote video track with screenStream of video track
 	    this.ctx.transceivers[1].sender.replaceTrack(
 	      this.ctx.screenStream.getTracks()[1]
 	    );
+	    // this.ctx.peerConnection.addTrack(this.ctx.screenStream.getTracks()[1]);
 	    // replace remote audio track with merged audio.
 	    this.ctx.transceivers[0].sender.replaceTrack(
-	      //this.mergeAudioStreams(this.ctx.screenStream, this.ctx.localStream)
-	      this.ctx.screenStream.getTracks()[0]
+	      this.mergeAudioStreams(this.ctx.screenStream, this.ctx.localStream)
+	      //this.ctx.screenStream.getTracks()[0]
 	    );
 	    // this.ctx.localStream.addTrack(this.ctx.transceivers[0].sender.track); // why add owned voice?
 	    this.ctx.localVideo.srcObject = this.ctx.localStream;
@@ -3131,19 +3140,19 @@
 
 	class Stat {
 	  constructor(ctx) {
-	    this.localVideoWidth= 0;
-	    this.localVideoHeight= 0;
-	    this.remoteVideoWidth= 0;
-	    this.remoteVideoHeight= 0;
-	    this.localFrameRate= 0;
-	    this.remoteFrameRate= 0;
-	    this.availableSendBandwidth= 0;
-	    this.availableReceiveBandwidth= 0;
-	    this.rtt= 0;
-	    this.localSentFrames=0;
+	    this.localVideoWidth = 0;
+	    this.localVideoHeight = 0;
+	    this.remoteVideoWidth = 0;
+	    this.remoteVideoHeight = 0;
+	    this.localFrameRate = 0;
+	    this.remoteFrameRate = 0;
+	    this.availableSendBandwidth = 0;
+	    this.availableReceiveBandwidth = 0;
+	    this.rtt = 0;
+	    this.localSentFrames = 0;
 	    this.remoteReceivedFrames = 0;
-	    this.sentBPS=0;
-	    this.receivedBPS=0;
+	    this.sentBPS = 0;
+	    this.receivedBPS = 0;
 	    this.sentBytes = 0;
 	    this.receivedBytes = 0;
 	  }
@@ -3171,27 +3180,39 @@
 	      // let statsOutput = "";
 	      this.context.peerConnection.getStats(null).then(stats => {
 	        stats.forEach(report => {
-	          switch(report.type){
+	          switch (report.type) {
 	            case "track":
-	              if (report.kind !== "video")break;
-	              if (report["remoteSource"]){
-	                if (report["frameWidth"]) newStat.remoteVideoWidth = report["frameWidth"];
-	                if (report["frameHeight"]) newStat.remoteVideoHeight = report["frameHeight"];
+	              if (report.kind !== "video") break;
+	              if (report["remoteSource"]) {
+	                if (report["frameWidth"])
+	                  newStat.remoteVideoWidth = report["frameWidth"];
+	                if (report["frameHeight"])
+	                  newStat.remoteVideoHeight = report["frameHeight"];
 	                newStat.remoteReceivedFrames = report["framesReceived"];
 	                if (report["framesReceived"])
-	                  newStat.remoteFrameRate = (report["framesReceived"] - oldStat.remoteReceivedFrames)/(this.interval/1000);
-	              }else {
-	                if (report["frameWidth"]) newStat.localVideoWidth = report["frameWidth"];
-	                if (report["frameHeight"]) newStat.localVideoHeight = report["frameHeight"];
+	                  newStat.remoteFrameRate =
+	                    (report["framesReceived"] - oldStat.remoteReceivedFrames) /
+	                    (this.interval / 1000);
+	              } else {
+	                if (report["frameWidth"])
+	                  newStat.localVideoWidth = report["frameWidth"];
+	                if (report["frameHeight"])
+	                  newStat.localVideoHeight = report["frameHeight"];
 	                newStat.localSentFrames = report["framesSent"];
 	                if (report["framesSent"])
-	                  newStat.localFrameRate = (report["framesSent"] - oldStat.localSentFrames)/(this.interval/1000);
+	                  newStat.localFrameRate =
+	                    (report["framesSent"] - oldStat.localSentFrames) /
+	                    (this.interval / 1000);
 	              }
 	            case "transport":
 	              newStat.sentBytes = report["bytesSent"];
 	              newStat.receivedBytes = report["bytesReceived"];
-	              newStat.sentBPS = (newStat.sentBytes - oldStat.sentBytes)/(this.interval/1000);
-	              newStat.receivedBPS = (newStat.receivedBytes - oldStat.receivedBytes)/(this.interval/1000); 
+	              newStat.sentBPS =
+	                (newStat.sentBytes - oldStat.sentBytes) /
+	                (this.interval / 1000);
+	              newStat.receivedBPS =
+	                (newStat.receivedBytes - oldStat.receivedBytes) /
+	                (this.interval / 1000);
 	          }
 	          // statsOutput += `<h2>Report: ${report.type}</h2>\n<strong>ID:</strong> ${report.id}<br>\n` +
 	          //               `<strong>Timestamp:</strong> ${report.timestamp}<br>\n`;
@@ -3204,7 +3225,6 @@
 	        // console.log(statsOutput)
 	      });
 	      console.log(newStat);
-	      
 	    }, this.interval);
 	  }
 
